@@ -27,7 +27,10 @@ import software.amazon.awssdk.services.lambda.model.*;
 import software.amazon.awssdk.services.lambda.model.Runtime;
 import software.amazon.awssdk.services.sts.StsClient;
 
-class S3TestSetupLambdaController implements AutoCloseable {
+/**
+ * This class deploys a AWS lambda function that can create and delete a test fixture with many small JSON files on S3.
+ */
+public class S3TestSetupLambdaController implements AutoCloseable {
     private static final String LAMBDA_FUNCTION_NAME = "create-json-files";
     private static final String ROLE_NAME = LAMBDA_FUNCTION_NAME + "-role";
     private static final String POLICY_NAME = LAMBDA_FUNCTION_NAME + "-policy";
@@ -40,6 +43,14 @@ class S3TestSetupLambdaController implements AutoCloseable {
     private final LambdaAsyncClient asyncLambdaClient;
     private final String owner;
 
+    /**
+     * Create a new instance of {@link S3TestSetupLambdaController}.
+     * 
+     * @param owner               owner referenced in {@code exa:owner} tag
+     * @param bucket              s3-bucket
+     * @param credentialsProvider AWS credentials provider
+     * @throws IOException if something goes wrong
+     */
     public S3TestSetupLambdaController(final String owner, final String bucket,
             final AwsCredentialsProvider credentialsProvider) throws IOException {
         this.owner = owner;
@@ -57,10 +68,20 @@ class S3TestSetupLambdaController implements AutoCloseable {
         }
     }
 
+    /**
+     * Create test files.
+     * 
+     * @param numberOfJsonFiles total number of files
+     * @param filesPerLambda    number of lambda functions to use in parallel
+     * @throws IOException if operation fails
+     */
     public void createFiles(final int numberOfJsonFiles, final int filesPerLambda) throws IOException {
         runLambdas(numberOfJsonFiles, filesPerLambda);
     }
 
+    /**
+     * Delete the test files from the bucket.
+     */
     public void deleteFiles() {
         final JsonObjectBuilder eventBuilder = Json.createObjectBuilder();
         eventBuilder.add("action", ACTION_DELETE);
