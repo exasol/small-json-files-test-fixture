@@ -24,17 +24,13 @@ class S3TestSetupLambdaControllerIT {
         controller = new S3TestSetupLambdaController(TEST_CONFIG.getOwner(), bucketName,
                 TEST_CONFIG.getAwsCredentialsProvider());
         s3Client = S3Client.builder().credentialsProvider(TEST_CONFIG.getAwsCredentialsProvider()).build();
+        s3Client.createBucket(request -> request.bucket(bucketName));
     }
 
     @AfterAll
     static void afterAll() throws IOException {
         controller.close();
         s3Client.deleteBucket(request -> request.bucket(bucketName));
-    }
-
-    @BeforeEach
-    void beforeEach() {
-        s3Client.createBucket(request -> request.bucket(bucketName));
     }
 
     @AfterEach
