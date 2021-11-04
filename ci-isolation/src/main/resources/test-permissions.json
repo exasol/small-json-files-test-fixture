@@ -1,0 +1,35 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*",
+        "iam:CreatePolicy",
+        "iam:CreateRole",
+        "iam:AttachRolePolicy",
+        "iam:DeleteRole",
+        "iam:DeletePolicy",
+        "iam:DetachRolePolicy",
+        "iam:GetRole",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:PutRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:AttachRolePolicy",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:PassRole",
+        "lambda:CreateFunction",
+        "lambda:DeleteFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:InvokeFunction",
+        "lambda:GetFunction"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
