@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
-class S3TestSetupLambdaControllerTest {
+class S3TestSetupLambdaControllerIT {
     private static final TestConfig TEST_CONFIG = TestConfig.instance();
     private static S3Client s3Client;
     private static S3TestSetupLambdaController controller;
