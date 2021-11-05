@@ -10,7 +10,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestSetupDescription {
+public final class TestSetupDescription {
     private int numberOfFiles;
     /**
      * The hash of the lambda function ensures the correct content in the files since the lambda function is the

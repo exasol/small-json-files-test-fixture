@@ -96,10 +96,14 @@ public class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private void uploadSetupDescription(final TestSetupDescription testSetupDescription) {
-        try (final S3Client s3Client = S3Client.builder().credentialsProvider(this.credentialsProvider).build()) {
+        try (final S3Client s3Client = createS3Client()) {
             s3Client.putObject(request -> request.bucket(this.bucket).key(SETUP_DESCRIPTION_KEY),
                     RequestBody.fromString(testSetupDescription.toJson()));
         }
+    }
+
+    private S3Client createS3Client() {
+        return S3Client.builder().credentialsProvider(this.credentialsProvider).build();
     }
 
     private boolean isCached(final TestSetupDescription requestedSetup) {
@@ -112,7 +116,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private Optional<TestSetupDescription> fetchSetupDescription() {
-        try (final S3Client s3Client = S3Client.builder().credentialsProvider(this.credentialsProvider).build()) {
+        try (final S3Client s3Client = createS3Client()) {
             final String json = new String(s3Client
                     .getObject(request -> request.bucket(this.bucket).key(SETUP_DESCRIPTION_KEY)).readAllBytes(),
                     StandardCharsets.UTF_8);
@@ -132,8 +136,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
         final JsonObjectBuilder eventBuilder = Json.createObjectBuilder();
         eventBuilder.add("action", ACTION_DELETE);
         eventBuilder.add("bucket", this.bucket);
-        try (final var asyncLambdaClient = LambdaAsyncClient.builder().httpClient(getHttpClientWithIncreasedTimeouts())
-                .credentialsProvider(this.credentialsProvider).build();) {
+        try (final var asyncLambdaClient = createAsyncLambdaClient()) {
             final CompletableFuture<InvokeResponse> future = startLambda(eventBuilder, asyncLambdaClient);
             final InvokeResponse result = future.get();
             if (result.functionError() != null) {
@@ -148,23 +151,28 @@ public class S3TestSetupLambdaController implements AutoCloseable {
         }
     }
 
+    private LambdaAsyncClient createAsyncLambdaClient() {
+        return LambdaAsyncClient.builder().httpClient(getHttpClientWithIncreasedTimeouts())
+                .credentialsProvider(this.credentialsProvider).build();
+    }
+
     private void deployFunction() throws IOException {
         final Role role = createRoleForLambda();
         final SdkBytes zipBytes = getZippedCreateFilesLambda();
-        try (final LambdaClient lambdaClient = getLambdaClient()) {
+        try (final LambdaClient lambdaClient = createLambdaClient()) {
             lambdaClient.createFunction(builder -> builder.functionName(LAMBDA_FUNCTION_NAME)
                     .architectures(Architecture.ARM64).code(FunctionCode.builder().zipFile(zipBytes).build())
                     .role(role.arn()).runtime(Runtime.NODEJS14_X).handler("createJsonFilesLambda.handler")
                     .timeout(15 * 60).tags(this.tags));
         }
         this.createdResources.add(() -> {
-            try (final LambdaClient lambdaClient = getLambdaClient()) {
+            try (final LambdaClient lambdaClient = createLambdaClient()) {
                 lambdaClient.deleteFunction(request -> request.functionName(LAMBDA_FUNCTION_NAME));
             }
         });
     }
 
-    private LambdaClient getLambdaClient() {
+    private LambdaClient createLambdaClient() {
         return LambdaClient.builder().credentialsProvider(this.credentialsProvider).build();
     }
 
@@ -235,8 +243,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private void runLambdas(final int numberOfJsonFiles, final int filesPerLambda) {
-        try (final var asyncLambdaClient = LambdaAsyncClient.builder().httpClient(getHttpClientWithIncreasedTimeouts())
-                .credentialsProvider(this.credentialsProvider).build()) {
+        try (final var asyncLambdaClient = createAsyncLambdaClient()) {
             if (numberOfJsonFiles % filesPerLambda != 0) {
                 throw new IllegalArgumentException(
                         "Number of JSON files must be a multiple of filesPerLambda(" + filesPerLambda + ").");
