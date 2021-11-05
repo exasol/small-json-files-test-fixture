@@ -270,6 +270,9 @@
                         <linkReplacement>
                             https://awhitford.github.com/lombok.maven/lombok-maven-plugin/|http://anthonywhitford.com/lombok.maven/lombok-maven-plugin/
                         </linkReplacement>
+                        <linkReplacement>
+                            https://aws.amazon.com/sdkforjava/http-clients/netty-nio-client|https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/nio/netty/NettyNioAsyncHttpClient.html
+                        </linkReplacement>
                     </linkReplacements>
                 </configuration>
             </plugin>
