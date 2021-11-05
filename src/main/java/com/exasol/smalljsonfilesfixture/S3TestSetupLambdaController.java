@@ -59,6 +59,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
      * @param tags                tags for the AWS resources
      * @param bucket              s3-bucket
      * @param credentialsProvider AWS credentials provider
+     * @return created {@link S3TestSetupLambdaController}
      * @throws IOException if something goes wrong
      */
     public static S3TestSetupLambdaController create(final Map<String, String> tags, final String bucket,

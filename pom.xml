@@ -284,6 +284,9 @@
                         <linkReplacement>
                             https://aws.amazon.com/sdkforjava/http-clients/netty-nio-client|https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/nio/netty/NettyNioAsyncHttpClient.html
                         </linkReplacement>
+                        <linkReplacement>
+                            https://eclipse-ee4j.github.io/jsonb-api|https://github.com/eclipse-ee4j/jsonb-api
+                        </linkReplacement>
                     </linkReplacements>
                 </configuration>
             </plugin>

@@ -71,7 +71,6 @@
 [33]: https://projects.eclipse.org/projects/ee4j.yasson
 [0]: https://aws.amazon.com/sdkforjava
 [3]: https://opensource.org/licenses/MIT
-[15]: https://eclipse-ee4j.github.io/jsonb-api
 [18]: https://github.com/mockito/mockito
 [38]: https://maven.apache.org/surefire/maven-failsafe-plugin/
 [42]: http://www.mojohaus.org/versions-maven-plugin/
@@ -97,6 +96,7 @@
 [12]: https://github.com/eclipse-ee4j/jsonp
 [62]: https://maven.apache.org/plugins/maven-source-plugin/
 [10]: https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/nio/netty/NettyNioAsyncHttpClient.html
+[15]: https://github.com/eclipse-ee4j/jsonb-api
 [14]: https://projects.eclipse.org/license/secondary-gpl-2.0-cp
 [22]: http://hamcrest.org/JavaHamcrest/
 [58]: http://maven.apache.org/plugins/maven-deploy-plugin/
