@@ -98,9 +98,20 @@
             <version>2.0.1</version>
         </dependency>
         <dependency>
+            <groupId>jakarta.json.bind</groupId>
+            <artifactId>jakarta.json.bind-api</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.json</artifactId>
             <version>2.0.1</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>yasson</artifactId>
+            <version>2.0.2</version>
             <scope>runtime</scope>
         </dependency>
         <!-- Test dependencies -->
@@ -139,6 +150,12 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.29</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.jqno.equalsverifier</groupId>
+            <artifactId>equalsverifier</artifactId>
+            <version>3.7.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -272,6 +289,9 @@
                         </linkReplacement>
                         <linkReplacement>
                             https://aws.amazon.com/sdkforjava/http-clients/netty-nio-client|https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/nio/netty/NettyNioAsyncHttpClient.html
+                        </linkReplacement>
+                        <linkReplacement>
+                            https://eclipse-ee4j.github.io/jsonb-api|https://github.com/eclipse-ee4j/jsonb-api
                         </linkReplacement>
                     </linkReplacements>
                 </configuration>

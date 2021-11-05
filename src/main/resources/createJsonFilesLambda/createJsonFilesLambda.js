@@ -53,7 +53,7 @@ async function handleCreate(event, context) {
     let promises = []
     for (let i = 0; i < event.numberOfFiles; i++) {
         const fileId = event.offset + i;
-        const key = 'test-data-' + fileId + ".json";
+        const key = event.prefix + fileId + ".json";
         const data = {
             id: fileId,
             name: randomString(20)
