@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk');
-
 const https = require('https');
+
+const ACTION_DELETE_LIST = "deleteList";
+
 const agent = new https.Agent({
     keepAlive: true,
     maxSockets: 100
@@ -19,7 +21,7 @@ exports.handler = async (event, context) => {
         await handleCreate(event, context);
     } else if (event.action === "delete") {
         await handleDelete(event, context);
-    } else if(event.action === ACTION_DELETE_LIST) {
+    } else if (event.action === ACTION_DELETE_LIST) {
         await handleDeleteList(event, context);
     } else {
         throw "Unknown action '" + event.action + "'"
@@ -45,8 +47,6 @@ async function doWithRetry(func) {
         }
     }
 }
-
-const ACTION_DELETE_LIST = "deleteList";
 
 async function handleCreate(event, context) {
     const s3 = getS3Client();
@@ -81,7 +81,7 @@ async function handleDelete(event, context) {
     let objectsPage = await s3.listObjectsV2({Bucket: event.bucket}).promise();
     while (true) {
         let objects = []
-        for(let object of objectsPage.Contents) {
+        for (let object of objectsPage.Contents) {
             objects.push(object.Key);
         }
         const callParams = JSON.stringify({
@@ -91,7 +91,7 @@ async function handleDelete(event, context) {
         })
         console.log(objects);
         promises.push(lambdaClient.invoke({FunctionName: context.functionName, Payload: callParams}).promise());
-        if(objectsPage.NextContinuationToken) {
+        if (objectsPage.NextContinuationToken) {
             objectsPage = await s3.listObjectsV2({
                 Bucket: event.bucket,
                 ContinuationToken: objectsPage.NextContinuationToken

@@ -41,19 +41,19 @@ public class S3TestSetupLambdaController implements AutoCloseable {
     private final String accountId;
     private final String bucket;
     private final LambdaAsyncClient asyncLambdaClient;
-    private final String owner;
+    private final Map<String, String> tags;
 
     /**
      * Create a new instance of {@link S3TestSetupLambdaController}.
      * 
-     * @param owner               owner referenced in {@code exa:owner} tag
+     * @param tags                tags for the AWS resources
      * @param bucket              s3-bucket
      * @param credentialsProvider AWS credentials provider
      * @throws IOException if something goes wrong
      */
-    public S3TestSetupLambdaController(final String owner, final String bucket,
+    public S3TestSetupLambdaController(final Map<String, String> tags, final String bucket,
             final AwsCredentialsProvider credentialsProvider) throws IOException {
-        this.owner = owner;
+        this.tags = tags;
         this.bucket = bucket;
         try {
             this.accountId = StsClient.builder().credentialsProvider(credentialsProvider).build().getCallerIdentity()
@@ -73,9 +73,8 @@ public class S3TestSetupLambdaController implements AutoCloseable {
      * 
      * @param numberOfJsonFiles total number of files
      * @param filesPerLambda    number of files to read per lambda function
-     * @throws IOException if operation fails
      */
-    public void createFiles(final int numberOfJsonFiles, final int filesPerLambda) throws IOException {
+    public void createFiles(final int numberOfJsonFiles, final int filesPerLambda) {
         runLambdas(numberOfJsonFiles, filesPerLambda);
     }
 
@@ -107,7 +106,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
         lambdaClient.createFunction(builder -> builder.functionName(LAMBDA_FUNCTION_NAME)
                 .architectures(Architecture.ARM64).code(FunctionCode.builder().zipFile(zipBytes).build())
                 .role(role.arn()).runtime(Runtime.NODEJS14_X).handler("createJsonFilesLambda.handler").timeout(15 * 60)
-                .tags(Map.of("exa:owner", this.owner, "exa:project", "S3VS")));
+                .tags(this.tags));
         this.createdResources
                 .add(() -> lambdaClient.deleteFunction(request -> request.functionName(LAMBDA_FUNCTION_NAME)));
     }
@@ -178,10 +177,10 @@ public class S3TestSetupLambdaController implements AutoCloseable {
         }
     }
 
-    private void runLambdas(final int numberOfJsonFiles, final int filesPerLambda) throws IOException {
+    private void runLambdas(final int numberOfJsonFiles, final int filesPerLambda) {
         if (numberOfJsonFiles % filesPerLambda != 0) {
             throw new IllegalArgumentException(
-                    "Number of JSON files must be a multiple of filesPerLambda (" + filesPerLambda + ")");
+                    "Number of JSON files must be a multiple of filesPerLambda(" + filesPerLambda + ").");
         }
         final int numberOfLambdas = numberOfJsonFiles / filesPerLambda;
         if (numberOfLambdas > 1000) {

@@ -2,8 +2,10 @@ package com.exasol.smalljsonfilesfixture;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.junit.jupiter.api.*;
 
@@ -21,7 +23,8 @@ class S3TestSetupLambdaControllerIT {
     @BeforeAll
     static void beforeAll() throws IOException {
         bucketName = "small-json-files-test-fixture-" + System.currentTimeMillis();
-        controller = new S3TestSetupLambdaController(TEST_CONFIG.getOwner(), bucketName,
+        controller = new S3TestSetupLambdaController(
+                Map.of("exa:owner", TEST_CONFIG.getOwner(), "exa:project", "SJFTF"), bucketName,
                 TEST_CONFIG.getAwsCredentialsProvider());
         s3Client = S3Client.builder().credentialsProvider(TEST_CONFIG.getAwsCredentialsProvider()).build();
         s3Client.createBucket(request -> request.bucket(bucketName));
@@ -51,6 +54,20 @@ class S3TestSetupLambdaControllerIT {
                 RequestBody.fromString("myObject"));
         controller.deleteFiles();
         assertThat("the file was not deleted", countDataFiles(), equalTo(0));
+    }
+
+    @Test
+    void testTooManyLambdasException() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> controller.createFiles(2000, 1));
+        assertThat(exception.getMessage(), equalTo("More then 1000 lambdas are currently not supported."));
+    }
+
+    @Test
+    void testNotAMultiple() {
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> controller.createFiles(10, 3));
+        assertThat(exception.getMessage(), equalTo("Number of JSON files must be a multiple of filesPerLambda(3)."));
     }
 
     private void emptyS3Bucket(final String bucketName) {
