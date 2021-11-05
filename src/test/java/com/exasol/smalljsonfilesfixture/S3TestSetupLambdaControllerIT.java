@@ -25,7 +25,7 @@ class S3TestSetupLambdaControllerIT {
     @BeforeAll
     static void beforeAll() throws IOException {
         bucketName = "small-json-files-test-fixture-" + System.currentTimeMillis();
-        controller = new S3TestSetupLambdaController(
+        controller = S3TestSetupLambdaController.create(
                 Map.of("exa:owner", TEST_CONFIG.getOwner(), "exa:project", "SJFTF"), bucketName,
                 TEST_CONFIG.getAwsCredentialsProvider());
         s3Client = S3Client.builder().credentialsProvider(TEST_CONFIG.getAwsCredentialsProvider()).build();
