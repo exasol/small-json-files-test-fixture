@@ -5,12 +5,14 @@ Code name: Initial Implementation
 ## Features
 
 * #1: Initial implementation
+* #4: Added cache
 
 ## Dependency Updates
 
 ### Compile Dependency Updates
 
 * Added `com.exasol:error-reporting-java:0.4.0`
+* Added `jakarta.json.bind:jakarta.json.bind-api:2.0.0`
 * Added `jakarta.json:jakarta.json-api:2.0.1`
 * Added `org.mockito:mockito-core:4.0.0`
 * Added `software.amazon.awssdk:iam:2.17.66`
@@ -21,6 +23,7 @@ Code name: Initial Implementation
 
 ### Runtime Dependency Updates
 
+* Added `org.eclipse:yasson:2.0.2`
 * Added `org.glassfish:jakarta.json:2.0.1`
 
 ### Test Dependency Updates

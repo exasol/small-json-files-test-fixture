@@ -2,6 +2,8 @@ package com.exasol.smalljsonfilesfixture;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -42,10 +44,31 @@ class S3TestSetupLambdaControllerIT {
     }
 
     @Test
-    void testCreateFiles() throws IOException {
+    void testCreateFiles() {
         final int fileCount = 100;
         controller.createFiles(fileCount, 10);
         assertThat(countDataFiles(), equalTo(fileCount));
+    }
+
+    @Test
+    void testCreateFileWithCache() {
+        final int fileCount = 100;
+        controller.createFiles(fileCount, 10);
+        final long start = System.currentTimeMillis();
+        controller.createFiles(fileCount, 10);
+        final int elapsed = (int) (System.currentTimeMillis() - start);
+        assertAll(//
+                () -> assertThat(elapsed, lessThan(1000)), //
+                () -> assertThat(countDataFiles(), equalTo(fileCount))//
+        );
+    }
+
+    @Test
+    void testInvalidateCache() {
+        controller.createFiles(100, 10);
+        final int newFileCount = 10;
+        controller.createFiles(newFileCount, 10);
+        assertThat(countDataFiles(), equalTo(newFileCount));
     }
 
     @Test
