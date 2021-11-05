@@ -25,7 +25,6 @@ Code name: Initial Implementation
 
 ### Test Dependency Updates
 
-* Added `junit:junit:4.13.2`
 * Added `org.hamcrest:hamcrest:2.2`
 * Added `org.junit.jupiter:junit-jupiter-engine:5.8.1`
 * Added `org.junit.jupiter:junit-jupiter-params:5.8.1`
