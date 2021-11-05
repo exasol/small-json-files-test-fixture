@@ -19,9 +19,9 @@ exports.handler = async (event, context) => {
         await handleCreate(event, context);
     } else if (event.action === "delete") {
         await handleDelete(event, context);
-    }else if(event.action === ACTION_DELETE_LIST){
+    } else if(event.action === ACTION_DELETE_LIST) {
         await handleDeleteList(event, context);
-    }else{
+    } else {
         throw "Unknown action '" + event.action + "'"
     }
 };
@@ -35,10 +35,10 @@ async function doWithRetry(func) {
             break;
         } catch (exception) {
             if (retryCounter < 3) {
-                await delay(10000)
-                console.log("operation failed: " + exception)
-                console.log("retrying")
-                retryCounter++
+                await delay(10000);
+                console.log("operation failed: " + exception);
+                console.log("retrying");
+                retryCounter++;
             } else {
                 throw exception;
             }
@@ -76,50 +76,50 @@ async function handleCreate(event, context) {
 
 async function handleDelete(event, context) {
     const s3 = getS3Client();
-    const lambdaClient = new AWS.Lambda()
-    let promises = []
-    let objectsPage = await s3.listObjectsV2({Bucket: event.bucket}).promise()
+    const lambdaClient = new AWS.Lambda();
+    let promises = [];
+    let objectsPage = await s3.listObjectsV2({Bucket: event.bucket}).promise();
     while (true) {
         let objects = []
-        for(let object of objectsPage.Contents){
-            objects.push(object.Key)
+        for(let object of objectsPage.Contents) {
+            objects.push(object.Key);
         }
         const callParams = JSON.stringify({
             action: ACTION_DELETE_LIST,
             bucket: event.bucket,
             objects: objects
         })
-        console.log(objects)
-        promises.push(lambdaClient.invoke({FunctionName: context.functionName, Payload: callParams}).promise())
+        console.log(objects);
+        promises.push(lambdaClient.invoke({FunctionName: context.functionName, Payload: callParams}).promise());
         if(objectsPage.NextContinuationToken) {
             objectsPage = await s3.listObjectsV2({
                 Bucket: event.bucket,
                 ContinuationToken: objectsPage.NextContinuationToken
-            }).promise()
-        }else{
+            }).promise();
+        } else {
             break;
         }
     }
     try {
-        await Promise.all(promises)
+        await Promise.all(promises);
     } catch (exception) {
-        context.fail("failed start delete-files lambda: " + exception)
-        throw exception
+        context.fail("failed start delete-files lambda: " + exception);
+        throw exception;
     }
 }
 
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
-    let promises = []
+    let promises = [];
     for (let key of event.objects) {
         const params = {Bucket: event.bucket, Key: key};
         promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
     }
     try {
-        await Promise.all(promises)
+        await Promise.all(promises);
     } catch (exception) {
-        context.fail("failed to delete objects: " + exception)
-        throw exception
+        context.fail("failed to delete objects: " + exception);
+        throw exception;
     }
 }
 

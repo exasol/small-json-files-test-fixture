@@ -72,7 +72,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
      * Create test files.
      * 
      * @param numberOfJsonFiles total number of files
-     * @param filesPerLambda    number of lambda functions to use in parallel
+     * @param filesPerLambda    number of files to read per lambda function
      * @throws IOException if operation fails
      */
     public void createFiles(final int numberOfJsonFiles, final int filesPerLambda) throws IOException {
@@ -113,7 +113,6 @@ public class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private SdkAsyncHttpClient getHttpClientWithIncreasedTimeouts() {
-
         return NettyNioAsyncHttpClient.builder().readTimeout(Duration.ofMinutes(16))
                 .connectionAcquisitionTimeout(Duration.ofMinutes(1)).writeTimeout(Duration.ofMinutes(1))
                 .connectionTimeout(Duration.ofMinutes(1)).maxConcurrency(600).build();
@@ -138,6 +137,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
     @SuppressWarnings("java:S2925") // we have no alternative to active waiting here since AWS is only eventual
                                     // consistent
     private void waitForRoleBeingFullyCreated() {
+        LOGGER.log(INFO, "Waiting for lambda role...");
         try {
             Thread.sleep(30000);
         } catch (final InterruptedException e) {
@@ -159,7 +159,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
         try (final InputStream stream = getClass().getClassLoader().getResourceAsStream(resourceName)) {
             return new String(Objects.requireNonNull(stream).readAllBytes(), StandardCharsets.UTF_8);
         } catch (final IOException exception) {
-            throw new UncheckedIOException("Failed to read test resource.", exception);
+            throw new UncheckedIOException("Failed to read test resource '" + resourceName + "'.", exception);
         }
     }
 
