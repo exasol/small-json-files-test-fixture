@@ -308,7 +308,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
 
     private String getLambdaFunctionHash() {
         try {
-            final var hashBuilder = MessageDigest.getInstance("sha512");
+            final var hashBuilder = MessageDigest.getInstance("SHA-256");
             try (final InputStream lambdaAsStream = Objects
                     .requireNonNull(getClass().getClassLoader().getResourceAsStream(CREATE_JSON_FILES_LAMBDA))) {
                 final byte[] byteArray = new byte[1024];
