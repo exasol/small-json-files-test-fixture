@@ -13,7 +13,7 @@
         "logs:PutLogEvents"
       ],
       "Resource": [
-        "arn:aws:logs:eu-central-1:{ACCOUNT}:log-group:/aws/lambda/create-json-files:*"
+        "arn:aws:logs:eu-central-1:{ACCOUNT}:log-group:/aws/lambda/{FUNCTION}:*"
       ]
     },
     {
@@ -34,7 +34,7 @@
         "lambda:InvokeFunction"
       ],
       "Resource": [
-        "arn:aws:lambda:eu-central-1:{ACCOUNT}:function:create-json-files"
+        "arn:aws:lambda:eu-central-1:{ACCOUNT}:function:{FUNCTION}"
       ]
     }
   ]
