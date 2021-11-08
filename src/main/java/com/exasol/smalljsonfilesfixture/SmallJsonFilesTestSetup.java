@@ -27,6 +27,8 @@ public class SmallJsonFilesTestSetup {
      * @param tags                tags for the AWS resources
      * @param bucket              s3-bucket
      * @param credentialsProvider AWS credentials provider
+     * @param numberOfJsonFiles   total number of files
+     * @param filesPerLambda      number of files to read per lambda function
      * @throws IOException if something goes wrong
      */
     public void setup(final Map<String, String> tags, final String bucket,
