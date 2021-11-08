@@ -37,7 +37,7 @@ new SmallJsonFilesTestSetup().setup(
         Map.of("exa:project","MYPROJ","exa:owner","me@examle.com"),
         "myBucket",
         awsCredentialsProvider,
-        1_000_000,
+        1_000_000 /* files */,
         20_000 /* files per lambda function */);
 ```
 
