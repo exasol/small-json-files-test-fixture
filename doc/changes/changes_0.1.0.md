@@ -1,4 +1,4 @@
-# Small Json Files Test Fixture 0.1.0, released 2021-??-??
+# Small Json Files Test Fixture 0.1.0, released 2021-11-08
 
 Code name: Initial Implementation
 
@@ -6,6 +6,8 @@ Code name: Initial Implementation
 
 * #1: Initial implementation
 * #4: Added cache
+* #6: Only install lambda if needed
+* #3: Prefix resources to avoid collisions
 
 ## Dependency Updates
 

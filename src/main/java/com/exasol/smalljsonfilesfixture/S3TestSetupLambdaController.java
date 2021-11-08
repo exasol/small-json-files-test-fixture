@@ -4,7 +4,6 @@ import static java.util.logging.Level.INFO;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -14,11 +13,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import jakarta.json.*;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.regions.Region;
@@ -29,29 +25,36 @@ import software.amazon.awssdk.services.lambda.LambdaAsyncClient;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.lambda.model.*;
 import software.amazon.awssdk.services.lambda.model.Runtime;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.sts.StsClient;
 
 /**
- * This class deploys a AWS lambda function that can create and delete a test fixture with many small JSON files on S3.
+ * This class deploys an AWS lambda function that can create and delete a test fixture with many small JSON files on S3.
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class S3TestSetupLambdaController implements AutoCloseable {
-    private static final String LAMBDA_FUNCTION_NAME = "create-json-files";
-    private static final String ROLE_NAME = LAMBDA_FUNCTION_NAME + "-role";
-    private static final String POLICY_NAME = LAMBDA_FUNCTION_NAME + "-policy";
+class S3TestSetupLambdaController implements AutoCloseable {
+    private final String lambdaFunctionName;
+    private final String roleName;
+    private final String policyName;
     private static final Logger LOGGER = Logger.getLogger(S3TestSetupLambdaController.class.getName());
     private static final String ACTION_CREATE = "create";
     private static final String ACTION_DELETE = "delete";
     private static final String FILE_PREFIX = "test-data-";
     private static final String CREATE_JSON_FILES_LAMBDA = "createJsonFilesLambda/createJsonFilesLambda.js";
-    private static final String SETUP_DESCRIPTION_KEY = ".setup-description.json";
     private final List<Closeable> createdResources = new ArrayList<>();
     private final String accountId;
     private final String bucket;
     private final AwsCredentialsProvider credentialsProvider;
     private final Map<String, String> tags;
+
+    private S3TestSetupLambdaController(final String accountId, final String bucket,
+            final AwsCredentialsProvider credentialsProvider, final Map<String, String> tags) {
+        this.accountId = accountId;
+        this.bucket = bucket;
+        this.credentialsProvider = credentialsProvider;
+        this.tags = tags;
+        this.lambdaFunctionName = "create-json-files-" + System.currentTimeMillis();
+        this.roleName = this.lambdaFunctionName + "-role";
+        this.policyName = this.lambdaFunctionName + "-policy";
+    }
 
     /**
      * Create a new instance of {@link S3TestSetupLambdaController}.
@@ -84,48 +87,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
      * @param filesPerLambda    number of files to read per lambda function
      */
     public void createFiles(final int numberOfJsonFiles, final int filesPerLambda) {
-        final TestSetupDescription testSetupDescription = new TestSetupDescription(numberOfJsonFiles,
-                getLambdaFunctionHash());
-        if (isCached(testSetupDescription)) {
-            LOGGER.info("Test setup is already in-place");
-        } else {
-            deleteFiles();
-            runLambdas(numberOfJsonFiles, filesPerLambda);
-            uploadSetupDescription(testSetupDescription);
-        }
-    }
-
-    private void uploadSetupDescription(final TestSetupDescription testSetupDescription) {
-        try (final S3Client s3Client = createS3Client()) {
-            s3Client.putObject(request -> request.bucket(this.bucket).key(SETUP_DESCRIPTION_KEY),
-                    RequestBody.fromString(testSetupDescription.toJson()));
-        }
-    }
-
-    private S3Client createS3Client() {
-        return S3Client.builder().credentialsProvider(this.credentialsProvider).build();
-    }
-
-    private boolean isCached(final TestSetupDescription requestedSetup) {
-        final Optional<TestSetupDescription> actualSetup = fetchSetupDescription();
-        if (actualSetup.isEmpty()) {
-            return false;
-        } else {
-            return actualSetup.get().equals(requestedSetup);
-        }
-    }
-
-    private Optional<TestSetupDescription> fetchSetupDescription() {
-        try (final S3Client s3Client = createS3Client()) {
-            final String json = new String(s3Client
-                    .getObject(request -> request.bucket(this.bucket).key(SETUP_DESCRIPTION_KEY)).readAllBytes(),
-                    StandardCharsets.UTF_8);
-            return Optional.of(TestSetupDescription.fromJson(json));
-        } catch (final NoSuchKeyException exception) {
-            return Optional.empty();
-        } catch (final IOException exception) {
-            throw new IllegalStateException("Failed to fetch setup description.", exception);
-        }
+        runLambdas(numberOfJsonFiles, filesPerLambda);
     }
 
     /**
@@ -160,14 +122,14 @@ public class S3TestSetupLambdaController implements AutoCloseable {
         final Role role = createRoleForLambda();
         final SdkBytes zipBytes = getZippedCreateFilesLambda();
         try (final LambdaClient lambdaClient = createLambdaClient()) {
-            lambdaClient.createFunction(builder -> builder.functionName(LAMBDA_FUNCTION_NAME)
+            lambdaClient.createFunction(builder -> builder.functionName(this.lambdaFunctionName)
                     .architectures(Architecture.ARM64).code(FunctionCode.builder().zipFile(zipBytes).build())
                     .role(role.arn()).runtime(Runtime.NODEJS14_X).handler("createJsonFilesLambda.handler")
                     .timeout(15 * 60).tags(this.tags));
         }
         this.createdResources.add(() -> {
             try (final LambdaClient lambdaClient = createLambdaClient()) {
-                lambdaClient.deleteFunction(request -> request.functionName(LAMBDA_FUNCTION_NAME));
+                lambdaClient.deleteFunction(request -> request.functionName(this.lambdaFunctionName));
             }
         });
     }
@@ -186,13 +148,14 @@ public class S3TestSetupLambdaController implements AutoCloseable {
         final IamClient iamClient = IamClient.builder().region(Region.AWS_GLOBAL)
                 .credentialsProvider(this.credentialsProvider).build();
         final Policy policy = iamClient
-                .createPolicy(request -> request.policyName(POLICY_NAME).policyDocument(getPolicyDocument())).policy();
+                .createPolicy(request -> request.policyName(this.policyName).policyDocument(getPolicyDocument()))
+                .policy();
         this.createdResources.add(iamClient::close);
         this.createdResources.add(() -> iamClient.deletePolicy(request -> request.policyArn(policy.arn())));
-        final Role role = iamClient.createRole(request -> request.roleName(ROLE_NAME)
+        final Role role = iamClient.createRole(request -> request.roleName(this.roleName)
                 .assumeRolePolicyDocument(getAssumeRolePolicyDocument()).path("/service-role/")).role();
         this.createdResources.add(() -> iamClient.deleteRole(request -> request.roleName(role.roleName())));
-        iamClient.attachRolePolicy(request -> request.roleName(ROLE_NAME).policyArn(policy.arn()));
+        iamClient.attachRolePolicy(request -> request.roleName(this.roleName).policyArn(policy.arn()));
         this.createdResources.add(
                 () -> iamClient.detachRolePolicy(request -> request.policyArn(policy.arn()).roleName(role.roleName())));
         waitForRoleBeingFullyCreated();
@@ -213,7 +176,8 @@ public class S3TestSetupLambdaController implements AutoCloseable {
 
     private String getPolicyDocument() {
         final String policyTemplate = getResourceAsString("createJsonFilesLambda/policy.json");
-        return policyTemplate.replace("{ACCOUNT}", this.accountId).replace("{BUCKET}", this.bucket);
+        return policyTemplate.replace("{ACCOUNT}", this.accountId).replace("{BUCKET}", this.bucket)
+                .replace("{FUNCTION}", this.lambdaFunctionName);
     }
 
     private String getAssumeRolePolicyDocument() {
@@ -298,7 +262,7 @@ public class S3TestSetupLambdaController implements AutoCloseable {
             final LambdaAsyncClient asyncLambdaClient) {
         try {
             final byte[] serializedEvent = serializeJson(eventBuilder);
-            return asyncLambdaClient.invoke(request -> request.functionName(LAMBDA_FUNCTION_NAME)
+            return asyncLambdaClient.invoke(request -> request.functionName(this.lambdaFunctionName)
                     .invocationType(InvocationType.REQUEST_RESPONSE).payload(SdkBytes.fromByteArray(serializedEvent)));
         } catch (final IOException exception) {
             throw new UncheckedIOException("Failed to start lambda function.", exception);
@@ -310,28 +274,6 @@ public class S3TestSetupLambdaController implements AutoCloseable {
                 final JsonWriter jsonWriter = Json.createWriter(bufferStream)) {
             jsonWriter.write(eventBuilder.build());
             return bufferStream.toByteArray();
-        }
-    }
-
-    private String getLambdaFunctionHash() {
-        try {
-            final var hashBuilder = MessageDigest.getInstance("SHA-256");
-            try (final InputStream lambdaAsStream = Objects
-                    .requireNonNull(getClass().getClassLoader().getResourceAsStream(CREATE_JSON_FILES_LAMBDA))) {
-                final byte[] byteArray = new byte[1024];
-                int readBytes = 0;
-                while ((readBytes = lambdaAsStream.read(byteArray)) != -1) {
-                    hashBuilder.update(byteArray, 0, readBytes);
-                }
-            }
-            final byte[] hash = hashBuilder.digest();
-            final StringBuilder hashStringBuilder = new StringBuilder();
-            for (final byte hashByte : hash) {
-                hashStringBuilder.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
-            }
-            return hashStringBuilder.toString();
-        } catch (final Exception exception) {
-            throw new IllegalStateException("Failed to build hash-code of lambda function", exception);
         }
     }
 

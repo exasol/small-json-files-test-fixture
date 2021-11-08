@@ -65,7 +65,7 @@ async function handleCreate(event, context) {
             Body: json_data
         };
         promises.push(doWithRetry(() => s3.upload(params).promise()));
-        await delay(1)
+        await delay(10)
     }
     try {
         await Promise.all(promises)
@@ -91,6 +91,7 @@ async function handleDelete(event, context) {
         })
         console.log(objects);
         promises.push(lambdaClient.invoke({FunctionName: context.functionName, Payload: callParams}).promise());
+        await delay(5)
         if (objectsPage.NextContinuationToken) {
             objectsPage = await s3.listObjectsV2({
                 Bucket: event.bucket,
@@ -114,6 +115,7 @@ async function handleDeleteList(event, context) {
     for (let key of event.objects) {
         const params = {Bucket: event.bucket, Key: key};
         promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
+        await delay(5)
     }
     try {
         await Promise.all(promises);
