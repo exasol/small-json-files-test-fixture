@@ -9,6 +9,10 @@ Code name: Initial Implementation
 * #6: Only install lambda if needed
 * #3: Prefix resources to avoid collisions
 
+## Documentation
+
+* #8: Improved Readme
+
 ## Dependency Updates
 
 ### Compile Dependency Updates

@@ -17,6 +17,34 @@
 
 Test fixture with many small JSON files on S3.
 
+The setup can be used for creating datasets with about 1,000,000 files on S3. Doing this from a local PC would take very long, since the connections over the internet have high latency. For that reason this setup creates the files using many parallel lambda functions directly in the AWS Cloud.
+
+The setup consists of JSON files like:
+
+```json
+{
+  "id": 1,
+  "name": "teinge1Chah0esh2shee"
+}
+```
+
+`Id` is a consecutive number, `name` a random string with 20 characters.
+
+## Usage
+
+```java
+new SmallJsonFilesTestSetup().setup(
+        Map.of("exa:project","MYPROJ","exa:owner","me@examle.com"),
+        "myBucket",awsCredentialsProvider,1_000_000,
+        20_000);
+```
+
+This will create the setup if in the bucket if it's not already there. It wil **not** delete the setup. The idea is that you keep the setup in you account.
+
+## Costs
+
+Creating 1_000_000 S3 objects costs about $5. Compared to that storage is cheap, since the files are so small.
+
 ## Additional Information
 
 * [Changelog](doc/changes/changelog.md)
