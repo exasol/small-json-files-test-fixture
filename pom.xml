@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>small-json-files-test-fixture</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <name>Small Json Files Test Fixture</name>
     <description>Test fixture with many small JSON files on S3.</description>
     <url>https://github.com/exasol/small-json-files-test-fixture</url>
@@ -36,6 +36,12 @@
             <organizationUrl>https://www.exasol.com/</organizationUrl>
         </developer>
     </developers>
+    <scm>
+        <connection>scm:git:https://github.com/exasol/small-json-files-test-fixture.git</connection>
+        <developerConnection>scm:git:https://github.com/exasol/small-json-files-test-fixture.git
+        </developerConnection>
+        <url>https://github.com/exasol/small-json-files-test-fixture/tree/main</url>
+    </scm>
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
