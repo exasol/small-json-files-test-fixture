@@ -35,11 +35,13 @@ The setup consists of JSON files like:
 ```java
 new SmallJsonFilesTestSetup().setup(
         Map.of("exa:project","MYPROJ","exa:owner","me@examle.com"),
-        "myBucket",awsCredentialsProvider,1_000_000,
-        20_000);
+        "myBucket",
+        awsCredentialsProvider,
+        1_000_000,
+        20_000 /* files per lambda function */);
 ```
 
-This will create the setup if in the bucket if it's not already there. It wil **not** delete the setup. The idea is that you keep the setup in you account.
+This will create the files in the bucket if it's not already there. It will **not** delete the setup. The idea is that you keep the files in you account.
 
 ## Costs
 
