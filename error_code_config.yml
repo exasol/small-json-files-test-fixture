@@ -2,3 +2,4 @@ error-tags:
   SJFTF:
     packages:
       - com.exasol.smalljsonfilesfixture
+    highest-index: 1
