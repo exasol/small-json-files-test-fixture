@@ -1,7 +1,7 @@
 # Small Json Files Test Fixture
 
 [![Build Status](https://github.com/exasol/small-json-files-test-fixture/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/small-json-files-test-fixture/actions/workflows/ci-build.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/com.exasol/small-json-files-test-fixture)](https://search.maven.org/artifact/com.exasol/small-json-files-test-fixture)
+[![Maven Central – Small Json Files Test Fixture](https://img.shields.io/maven-central/v/com.exasol/small-json-files-test-fixture)](https://search.maven.org/artifact/com.exasol/small-json-files-test-fixture)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Asmall-json-files-test-fixture&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.exasol%3Asmall-json-files-test-fixture)
 

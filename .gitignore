@@ -22,3 +22,5 @@ pom.xml.versionsBackup
 test_config.yml
 *package-lock.json
 /src/main/resources/createJsonFilesLambda/node_modules/
+
+*.flattened-pom.xml
