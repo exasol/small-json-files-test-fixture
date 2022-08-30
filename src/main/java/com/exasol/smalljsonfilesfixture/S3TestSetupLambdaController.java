@@ -31,14 +31,15 @@ import software.amazon.awssdk.services.sts.StsClient;
  * This class deploys an AWS lambda function that can create and delete a test fixture with many small JSON files on S3.
  */
 class S3TestSetupLambdaController implements AutoCloseable {
-    private final String lambdaFunctionName;
-    private final String roleName;
-    private final String policyName;
     private static final Logger LOGGER = Logger.getLogger(S3TestSetupLambdaController.class.getName());
     private static final String ACTION_CREATE = "create";
     private static final String ACTION_DELETE = "delete";
     private static final String FILE_PREFIX = "test-data-";
     private static final String CREATE_JSON_FILES_LAMBDA = "createJsonFilesLambda/createJsonFilesLambda.js";
+
+    private final String lambdaFunctionName;
+    private final String roleName;
+    private final String policyName;
     private final List<Closeable> createdResources = new ArrayList<>();
     private final String accountId;
     private final String bucket;
@@ -67,8 +68,8 @@ class S3TestSetupLambdaController implements AutoCloseable {
      */
     public static S3TestSetupLambdaController create(final Map<String, String> tags, final String bucket,
             final AwsCredentialsProvider credentialsProvider) throws IOException {
-        final String accountId = StsClient.builder().credentialsProvider(credentialsProvider).build()
-                .getCallerIdentity().account();
+        final String accountId = StsClient.builder().credentialsProvider(credentialsProvider)
+                .region(Region.EU_CENTRAL_1).build().getCallerIdentity().account();
         final S3TestSetupLambdaController controller = new S3TestSetupLambdaController(accountId, bucket,
                 credentialsProvider, tags);
         try {
@@ -109,7 +110,8 @@ class S3TestSetupLambdaController implements AutoCloseable {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting for delete-files lambda to finish.", exception);
         } catch (final ExecutionException | IllegalStateException exception) {
-            throw new IllegalStateException("The delete-files lambda function failed.", exception);
+            throw new IllegalStateException("The delete-files lambda function failed: " + exception.getMessage(),
+                    exception);
         }
     }
 
@@ -123,9 +125,10 @@ class S3TestSetupLambdaController implements AutoCloseable {
         final SdkBytes zipBytes = getZippedCreateFilesLambda();
         try (final LambdaClient lambdaClient = createLambdaClient()) {
             lambdaClient.createFunction(builder -> builder.functionName(this.lambdaFunctionName)
-                    .architectures(Architecture.ARM64).code(FunctionCode.builder().zipFile(zipBytes).build())
+                    .architectures(Architecture.ARM64).code(codeBuilder -> codeBuilder.zipFile(zipBytes))
                     .role(role.arn()).runtime(Runtime.NODEJS14_X).handler("createJsonFilesLambda.handler")
                     .timeout(15 * 60).tags(this.tags));
+            sleep("lambda '" + this.lambdaFunctionName + "'' being fully created", Duration.ofSeconds(5));
         }
         this.createdResources.add(() -> {
             try (final LambdaClient lambdaClient = createLambdaClient()) {
@@ -135,7 +138,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private LambdaClient createLambdaClient() {
-        return LambdaClient.builder().credentialsProvider(this.credentialsProvider).build();
+        return LambdaClient.builder().credentialsProvider(this.credentialsProvider).region(Region.EU_CENTRAL_1).build();
     }
 
     private SdkAsyncHttpClient getHttpClientWithIncreasedTimeouts() {
@@ -145,6 +148,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private Role createRoleForLambda() {
+        LOGGER.info(() -> "Creating role '" + this.roleName + "'...");
         final IamClient iamClient = IamClient.builder().region(Region.AWS_GLOBAL)
                 .credentialsProvider(this.credentialsProvider).build();
         final Policy policy = iamClient
@@ -158,16 +162,16 @@ class S3TestSetupLambdaController implements AutoCloseable {
         iamClient.attachRolePolicy(request -> request.roleName(this.roleName).policyArn(policy.arn()));
         this.createdResources.add(
                 () -> iamClient.detachRolePolicy(request -> request.policyArn(policy.arn()).roleName(role.roleName())));
-        waitForRoleBeingFullyCreated();
+        sleep("role '" + this.roleName + "' being fully created", Duration.ofSeconds(30));
         return role;
     }
 
     @SuppressWarnings("java:S2925") // we have no alternative to active waiting here since AWS is only eventual
                                     // consistent
-    private void waitForRoleBeingFullyCreated() {
-        LOGGER.log(INFO, "Waiting for lambda role...");
+    private void sleep(final String reason, final Duration duration) {
+        LOGGER.info(() -> "Waiting " + duration + " for " + reason + "...");
         try {
-            Thread.sleep(30000);
+            Thread.sleep(duration.toMillis());
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting.");
