@@ -30,6 +30,7 @@ Code name: Update to Project Keeper 2
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.7.2` to `3.10.1`
 * Updated `org.junit.jupiter:junit-jupiter-engine:5.8.1` to `5.9.0`
 * Updated `org.junit.jupiter:junit-jupiter-params:5.8.1` to `5.9.0`
+* Added `org.slf4j:slf4j-jdk14:1.7.36`
 * Updated `org.yaml:snakeyaml:1.29` to `1.31`
 
 ### Plugin Dependency Updates
