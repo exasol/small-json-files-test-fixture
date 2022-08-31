@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
@@ -103,6 +104,6 @@ public class SmallJsonFilesTestSetup {
     }
 
     private S3Client createS3Client(final AwsCredentialsProvider credentialsProvider) {
-        return S3Client.builder().credentialsProvider(credentialsProvider).build();
+        return S3Client.builder().credentialsProvider(credentialsProvider).region(Region.EU_CENTRAL_1).build();
     }
 }
