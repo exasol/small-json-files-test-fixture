@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>small-json-files-test-fixture</artifactId>
-    <version>1.0.0</version>
+    <version>0.1.3</version>
     <name>Small Json Files Test Fixture</name>
     <description>Test fixture with many small JSON files on S3.</description>
     <url>https://github.com/exasol/small-json-files-test-fixture/</url>
@@ -117,12 +117,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.31</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
             <version>3.10.1</version>
@@ -165,7 +159,7 @@
     <parent>
         <artifactId>small-json-files-test-fixture-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>1.0.0</version>
+        <version>0.1.3</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>

@@ -4,7 +4,7 @@
 
     <groupId>com.exasol.adapter.document.files.ciisolation</groupId>
     <artifactId>ci-isolation</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,7 +34,6 @@
     </build>
 
     <dependencies>
-        <!-- AWS Cloud Development Kit -->
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>ci-isolation-aws</artifactId>

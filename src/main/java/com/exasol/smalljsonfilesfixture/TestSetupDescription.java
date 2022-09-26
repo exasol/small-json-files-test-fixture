@@ -8,7 +8,6 @@ import jakarta.json.bind.JsonbBuilder;
  */
 public final class TestSetupDescription {
     private int numberOfFiles;
-
     private String hashOfLambdaFunction;
 
     /**
