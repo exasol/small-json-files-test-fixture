@@ -2,8 +2,10 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.organizeImports": true,
-        "source.generate.finalModifiers": true
+        "source.generate.finalModifiers": true,
+        "source.fixAll": true
     },
+    "java.codeGeneration.useBlocks": true,
     "java.saveActions.organizeImports": true,
     "java.sources.organizeImports.starThreshold": 3,
     "java.sources.organizeImports.staticStarThreshold": 3,
