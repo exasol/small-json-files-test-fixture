@@ -1,7 +1,7 @@
 {
-  "name": "createJsonFilesLambda",
+  "name": "create-json-files-lambda",
   "version": "1.0.0",
   "devDependencies": {
-    "aws-sdk": "^2.1019.0"
+    "aws-sdk": "^2.1223.0"
   }
 }
