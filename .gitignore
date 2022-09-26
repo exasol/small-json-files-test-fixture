@@ -19,7 +19,7 @@ pom.xml.versionsBackup
 *.orig
 *.old
 *.md.html
-test_config.yml
+test_config.properties
 *package-lock.json
 /src/main/resources/createJsonFilesLambda/node_modules/
 
