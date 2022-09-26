@@ -4,7 +4,6 @@ sources:
     modules:
       - maven_central
       - integration_tests
-      - lombok
 excludes:
   - "E-PK-CORE-18: Outdated content: '.github/workflows/ci-build.yml'"
   - "E-PK-CORE-18: Outdated content: '.github/workflows/release_droid_prepare_original_checksum.yml'"
