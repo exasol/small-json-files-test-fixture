@@ -5,14 +5,12 @@ import java.io.*;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import lombok.Data;
 import software.amazon.awssdk.auth.credentials.*;
 
-@Data
 public class TestConfig {
     private static final TestConfig CONFIG = new Reader().readTestConfig();
     private String awsProfile;
-    /** E-mail address of the contact-person for this project. Will be used in exa:owner tag for AWS resources. */
+
     private String owner;
 
     public static TestConfig instance() {
@@ -25,6 +23,24 @@ public class TestConfig {
         } else {
             return DefaultCredentialsProvider.builder().build();
         }
+    }
+
+    /**
+     * The AWS profile used for connecting to AWS.
+     * 
+     * @return the AWS profile
+     */
+    public String getAwsProfile() {
+        return awsProfile;
+    }
+
+    /**
+     * E-mail address of the contact-person for this project. Will be used in exa:owner tag for AWS resources.
+     * 
+     * @return E-mail address of the contact-person
+     */
+    public String getOwner() {
+        return owner;
     }
 
     private static class Reader {
