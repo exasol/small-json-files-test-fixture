@@ -24,7 +24,7 @@ exports.handler = async (event, context) => {
     } else if (event.action === ACTION_DELETE_LIST) {
         await handleDeleteList(event, context);
     } else {
-        throw "Unknown action '" + event.action + "'"
+        throw Error("Unknown action '" + event.action + "'")
     }
 };
 
@@ -78,7 +78,7 @@ async function handleDelete(event, context) {
     const s3 = getS3Client();
     const lambdaClient = new AWS.Lambda();
     let promises = [];
-    let objectsPage = await s3.listObjectsV2({Bucket: event.bucket}).promise();
+    let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket }).promise();
     while (true) {
         let objects = []
         for (let object of objectsPage.Contents) {
@@ -90,7 +90,7 @@ async function handleDelete(event, context) {
             objects: objects
         })
         console.log(objects);
-        promises.push(lambdaClient.invoke({FunctionName: context.functionName, Payload: callParams}).promise());
+        promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
         await delay(5)
         if (objectsPage.NextContinuationToken) {
             objectsPage = await s3.listObjectsV2({
@@ -113,7 +113,7 @@ async function handleDeleteList(event, context) {
     const s3 = getS3Client();
     let promises = [];
     for (let key of event.objects) {
-        const params = {Bucket: event.bucket, Key: key};
+        const params = { Bucket: event.bucket, Key: key };
         promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
         await delay(5)
     }
@@ -124,7 +124,6 @@ async function handleDeleteList(event, context) {
         throw exception;
     }
 }
-
 
 function randomString(length) {
     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
