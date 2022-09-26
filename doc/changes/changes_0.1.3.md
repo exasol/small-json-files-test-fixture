@@ -5,7 +5,7 @@ Code name: Fix Security Issues
 
 ## Summary
 
-In this release we removed test dependencies on snakeyaml and compile time dependency lombok.
+In this release we removed test dependencies on snakeyaml and compile time dependency [Lombok](https://projectlombok.org/).
 
 ## Features
 
