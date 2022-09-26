@@ -7,7 +7,7 @@
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [AWS Java SDK :: Services :: Amazon S3][0]                  | [Apache License, Version 2.0][1]                                                                             |
 | [Apache Commons Codec][2]                                   | [Apache License, Version 2.0][3]                                                                             |
-| [error-reporting-java][4]                                   | [MIT][5]                                                                                                     |
+| [error-reporting-java][4]                                   | [MIT License][5]                                                                                             |
 | [AWS Java SDK :: Services :: AWS Lambda][0]                 | [Apache License, Version 2.0][1]                                                                             |
 | [AWS Java SDK :: Services :: AWS IAM][0]                    | [Apache License, Version 2.0][1]                                                                             |
 | [AWS Java SDK :: Services :: AWS STS][0]                    | [Apache License, Version 2.0][1]                                                                             |
@@ -65,8 +65,8 @@
 [1]: https://aws.amazon.com/apache2.0
 [2]: https://commons.apache.org/proper/commons-codec/
 [3]: https://www.apache.org/licenses/LICENSE-2.0.txt
-[4]: https://github.com/exasol/error-reporting-java
-[5]: https://opensource.org/licenses/MIT
+[4]: https://github.com/exasol/error-reporting-java/
+[5]: https://github.com/exasol/error-reporting-java/blob/main/LICENSE
 [6]: https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/nio/netty/NettyNioAsyncHttpClient.html
 [7]: https://github.com/eclipse-ee4j/jsonp
 [8]: https://projects.eclipse.org/license/epl-2.0
