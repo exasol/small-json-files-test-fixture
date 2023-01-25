@@ -193,7 +193,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
             if (stream == null) {
                 throw new IllegalStateException("Failed to read resource '" + resourceName + "'");
             }
-            return new String(Objects.requireNonNull(stream).readAllBytes(), StandardCharsets.UTF_8);
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (final IOException exception) {
             throw new UncheckedIOException("Failed to read test resource '" + resourceName + "'.", exception);
         }
