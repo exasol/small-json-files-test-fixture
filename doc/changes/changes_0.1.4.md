@@ -21,6 +21,10 @@ This release fixes CVE-2022-41915 in dependency `io.netty:netty-codec:jar:4.1.77
 * Updated `software.amazon.awssdk:s3:2.17.281` to `2.19.23`
 * Updated `software.amazon.awssdk:sts:2.17.281` to `2.19.23`
 
+### Runtime Dependency Updates
+
+* Removed `org.glassfish:jakarta.json:2.0.1`
+
 ### Test Dependency Updates
 
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.10.1` to `3.12.3`
