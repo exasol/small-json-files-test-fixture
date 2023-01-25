@@ -29,10 +29,9 @@
 
 ## Runtime Dependencies
 
-| Dependency                   | License                                                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [JSON-P Default Provider][7] | [Eclipse Public License 2.0][8]; [GNU General Public License, version 2 with the GNU Classpath Exception][9] |
-| [Yasson][22]                 | [Eclipse Public License v. 2.0][23]; [Eclipse Distribution License v. 1.0][24]                               |
+| Dependency   | License                                                                        |
+| ------------ | ------------------------------------------------------------------------------ |
+| [Yasson][22] | [Eclipse Public License v. 2.0][23]; [Eclipse Distribution License v. 1.0][24] |
 
 ## Plugin Dependencies
 
@@ -41,8 +40,8 @@
 | [SonarQube Scanner for Maven][25]                       | [GNU LGPL 3][26]                               |
 | [Apache Maven Compiler Plugin][27]                      | [Apache License, Version 2.0][3]               |
 | [Apache Maven Enforcer Plugin][28]                      | [Apache License, Version 2.0][3]               |
-| [Maven Flatten Plugin][29]                              | [Apache Software Licenese][30]                 |
-| [org.sonatype.ossindex.maven:ossindex-maven-plugin][31] | [ASL2][30]                                     |
+| [Maven Flatten Plugin][29]                              | [Apache Software Licenese][3]                  |
+| [org.sonatype.ossindex.maven:ossindex-maven-plugin][30] | [ASL2][31]                                     |
 | [Maven Surefire Plugin][32]                             | [Apache License, Version 2.0][3]               |
 | [Versions Maven Plugin][33]                             | [Apache License, Version 2.0][3]               |
 | [Apache Maven Deploy Plugin][34]                        | [Apache License, Version 2.0][3]               |
@@ -53,13 +52,13 @@
 | [Maven Failsafe Plugin][40]                             | [Apache License, Version 2.0][3]               |
 | [JaCoCo :: Maven Plugin][41]                            | [Eclipse Public License 2.0][42]               |
 | [error-code-crawler-maven-plugin][43]                   | [MIT License][44]                              |
-| [Reproducible Build Maven Plugin][45]                   | [Apache 2.0][30]                               |
+| [Reproducible Build Maven Plugin][45]                   | [Apache 2.0][31]                               |
 | [Project keeper maven plugin][46]                       | [The MIT License][47]                          |
-| [Maven Clean Plugin][48]                                | [The Apache Software License, Version 2.0][30] |
-| [Maven Resources Plugin][49]                            | [The Apache Software License, Version 2.0][30] |
-| [Maven JAR Plugin][50]                                  | [The Apache Software License, Version 2.0][30] |
-| [Maven Install Plugin][51]                              | [The Apache Software License, Version 2.0][30] |
-| [Maven Site Plugin 3][52]                               | [The Apache Software License, Version 2.0][30] |
+| [Maven Clean Plugin][48]                                | [The Apache Software License, Version 2.0][31] |
+| [Maven Resources Plugin][49]                            | [The Apache Software License, Version 2.0][31] |
+| [Maven JAR Plugin][50]                                  | [The Apache Software License, Version 2.0][31] |
+| [Maven Install Plugin][51]                              | [The Apache Software License, Version 2.0][31] |
+| [Maven Site Plugin 3][52]                               | [The Apache Software License, Version 2.0][31] |
 
 [0]: https://aws.amazon.com/sdkforjava
 [1]: https://aws.amazon.com/apache2.0
@@ -91,10 +90,10 @@
 [27]: https://maven.apache.org/plugins/maven-compiler-plugin/
 [28]: https://maven.apache.org/enforcer/maven-enforcer-plugin/
 [29]: https://www.mojohaus.org/flatten-maven-plugin/
-[30]: http://www.apache.org/licenses/LICENSE-2.0.txt
-[31]: https://sonatype.github.io/ossindex-maven/maven-plugin/
+[30]: https://sonatype.github.io/ossindex-maven/maven-plugin/
+[31]: http://www.apache.org/licenses/LICENSE-2.0.txt
 [32]: https://maven.apache.org/surefire/maven-surefire-plugin/
-[33]: http://www.mojohaus.org/versions-maven-plugin/
+[33]: https://www.mojohaus.org/versions-maven-plugin/
 [34]: https://maven.apache.org/plugins/maven-deploy-plugin/
 [35]: https://maven.apache.org/plugins/maven-gpg-plugin/
 [36]: https://maven.apache.org/plugins/maven-source-plugin/
