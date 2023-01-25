@@ -190,6 +190,9 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     private String getResourceAsString(final String resourceName) {
         try (final InputStream stream = getClass().getClassLoader().getResourceAsStream(resourceName)) {
+            if (stream == null) {
+                throw new IllegalStateException("Failed to read resource '" + resourceName + "'");
+            }
             return new String(Objects.requireNonNull(stream).readAllBytes(), StandardCharsets.UTF_8);
         } catch (final IOException exception) {
             throw new UncheckedIOException("Failed to read test resource '" + resourceName + "'.", exception);
@@ -238,7 +241,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
                 lambdaFutures.add(future);
             }
             waitForLambdasToFinish(lambdaFutures);
-            LOGGER.log(INFO, "create done");
+            LOGGER.log(INFO, "Create done");
         }
     }
 
