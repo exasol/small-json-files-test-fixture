@@ -6,6 +6,8 @@ Code name: Fix vulnerabilities in dependencies
 
 This release fixes CVE-2022-41915 in dependency `io.netty:netty-codec:jar:4.1.77.Final` by upgrading it to `4.1.86.Final`.
 
+We also added a `module-info.java` to make this a Java 9 module.
+
 ## Features
 
 * #16: Fixed vulnerability in dependencies
