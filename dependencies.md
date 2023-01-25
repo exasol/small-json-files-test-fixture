@@ -49,11 +49,11 @@
 | [Apache Maven Source Plugin][36]                        | [Apache License, Version 2.0][3]               |
 | [Apache Maven Javadoc Plugin][37]                       | [Apache License, Version 2.0][3]               |
 | [Nexus Staging Maven Plugin][38]                        | [Eclipse Public License][39]                   |
-| [Project keeper maven plugin][40]                       | [The MIT License][41]                          |
-| [Maven Failsafe Plugin][42]                             | [Apache License, Version 2.0][3]               |
-| [JaCoCo :: Maven Plugin][43]                            | [Eclipse Public License 2.0][44]               |
-| [error-code-crawler-maven-plugin][45]                   | [MIT License][46]                              |
-| [Reproducible Build Maven Plugin][47]                   | [Apache 2.0][31]                               |
+| [Maven Failsafe Plugin][40]                             | [Apache License, Version 2.0][3]               |
+| [JaCoCo :: Maven Plugin][41]                            | [Eclipse Public License 2.0][42]               |
+| [error-code-crawler-maven-plugin][43]                   | [MIT License][44]                              |
+| [Reproducible Build Maven Plugin][45]                   | [Apache 2.0][31]                               |
+| [Project keeper maven plugin][46]                       | [The MIT License][47]                          |
 | [Maven Clean Plugin][48]                                | [The Apache Software License, Version 2.0][31] |
 | [Maven Resources Plugin][49]                            | [The Apache Software License, Version 2.0][31] |
 | [Maven JAR Plugin][50]                                  | [The Apache Software License, Version 2.0][31] |
@@ -100,14 +100,14 @@
 [37]: https://maven.apache.org/plugins/maven-javadoc-plugin/
 [38]: http://www.sonatype.com/public-parent/nexus-maven-plugins/nexus-staging/nexus-staging-maven-plugin/
 [39]: http://www.eclipse.org/legal/epl-v10.html
-[40]: https://github.com/exasol/project-keeper/
-[41]: https://github.com/exasol/project-keeper/blob/main/LICENSE
-[42]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-[43]: https://www.jacoco.org/jacoco/trunk/doc/maven.html
-[44]: https://www.eclipse.org/legal/epl-2.0/
-[45]: https://github.com/exasol/error-code-crawler-maven-plugin/
-[46]: https://github.com/exasol/error-code-crawler-maven-plugin/blob/main/LICENSE
-[47]: http://zlika.github.io/reproducible-build-maven-plugin
+[40]: https://maven.apache.org/surefire/maven-failsafe-plugin/
+[41]: https://www.jacoco.org/jacoco/trunk/doc/maven.html
+[42]: https://www.eclipse.org/legal/epl-2.0/
+[43]: https://github.com/exasol/error-code-crawler-maven-plugin/
+[44]: https://github.com/exasol/error-code-crawler-maven-plugin/blob/main/LICENSE
+[45]: http://zlika.github.io/reproducible-build-maven-plugin
+[46]: https://github.com/exasol/project-keeper/
+[47]: https://github.com/exasol/project-keeper/blob/main/LICENSE
 [48]: http://maven.apache.org/plugins/maven-clean-plugin/
 [49]: http://maven.apache.org/plugins/maven-resources-plugin/
 [50]: http://maven.apache.org/plugins/maven-jar-plugin/
