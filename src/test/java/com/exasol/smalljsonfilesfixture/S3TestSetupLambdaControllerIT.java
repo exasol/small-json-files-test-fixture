@@ -32,8 +32,12 @@ class S3TestSetupLambdaControllerIT {
 
     @AfterAll
     static void afterAll() throws IOException {
-        controller.close();
-        s3Client.deleteBucket(request -> request.bucket(bucketName));
+        if (controller != null) {
+            controller.close();
+        }
+        if (s3Client != null) {
+            s3Client.deleteBucket(request -> request.bucket(bucketName));
+        }
     }
 
     @AfterEach

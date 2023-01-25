@@ -22,5 +22,7 @@ pom.xml.versionsBackup
 test_config.properties
 *package-lock.json
 /src/main/resources/createJsonFilesLambda/node_modules/
-
+/.settings/org.eclipse.jdt.apt.core.prefs
+/.settings/org.eclipse.m2e.core.prefs
+/.settings/org.eclipse.core.resources.prefs
 *.flattened-pom.xml
