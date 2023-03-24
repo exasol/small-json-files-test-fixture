@@ -5,6 +5,7 @@ import static java.util.logging.Level.INFO;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -96,7 +97,8 @@ class S3TestSetupLambdaController implements AutoCloseable {
      * Delete the test files from the bucket.
      */
     public void deleteFiles() {
-        LOGGER.info("Deleting small-json-files test setup");
+        LOGGER.info(() -> "Deleting small-json-files test setup from bucket " + this.bucket + "...");
+        final Instant start = Instant.now();
         final JsonObjectBuilder eventBuilder = Json.createObjectBuilder();
         eventBuilder.add("action", ACTION_DELETE);
         eventBuilder.add("bucket", this.bucket);
@@ -107,7 +109,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
                 throw new IllegalStateException(
                         "Deleting files from bucket " + this.bucket + " failed:" + result.payload().asUtf8String());
             }
-            LOGGER.info("Delete done");
+            LOGGER.info(() -> "Delete done in " + Duration.between(start, Instant.now()));
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting for delete-files lambda to finish.", exception);
@@ -216,17 +218,18 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private void runLambdas(final int numberOfJsonFiles, final int filesPerLambda) {
+        if (numberOfJsonFiles % filesPerLambda != 0) {
+            throw new IllegalArgumentException(
+                    "Number of JSON files must be a multiple of filesPerLambda (" + filesPerLambda + ").");
+        }
         try (final var asyncLambdaClient = createAsyncLambdaClient()) {
-            if (numberOfJsonFiles % filesPerLambda != 0) {
-                throw new IllegalArgumentException(
-                        "Number of JSON files must be a multiple of filesPerLambda (" + filesPerLambda + ").");
-            }
             final int numberOfLambdas = numberOfJsonFiles / filesPerLambda;
             if (numberOfLambdas > 1000) {
                 throw new IllegalArgumentException("More then 1000 lambdas are currently not supported.");
             }
             LOGGER.log(INFO, "Creating {0} files using {1} lambda functions.",
                     new Object[] { numberOfJsonFiles, numberOfLambdas });
+            final Instant start = Instant.now();
             final List<CompletableFuture<InvokeResponse>> lambdaFutures = new ArrayList<>(numberOfLambdas);
             for (int lambdaCounter = 0; lambdaCounter < numberOfLambdas; lambdaCounter++) {
                 final JsonObject event = createLambdaEvent(filesPerLambda, lambdaCounter);
@@ -239,7 +242,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
                 lambdaFutures.add(future);
             }
             waitForLambdasToFinish(lambdaFutures);
-            LOGGER.log(INFO, "Create done");
+            LOGGER.info(() -> "Create done in " + Duration.between(start, Instant.now()));
         }
     }
 
