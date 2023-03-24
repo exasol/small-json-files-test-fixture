@@ -71,6 +71,6 @@ class S3TestSetupLambdaControllerIT {
     void testNotAMultiple() {
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> controller.createFiles(10, 3));
-        assertThat(exception.getMessage(), equalTo("Number of JSON files must be a multiple of filesPerLambda(3)."));
+        assertThat(exception.getMessage(), equalTo("Number of JSON files must be a multiple of filesPerLambda (3)."));
     }
 }

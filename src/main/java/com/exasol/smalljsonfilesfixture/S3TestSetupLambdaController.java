@@ -217,7 +217,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
         try (final var asyncLambdaClient = createAsyncLambdaClient()) {
             if (numberOfJsonFiles % filesPerLambda != 0) {
                 throw new IllegalArgumentException(
-                        "Number of JSON files must be a multiple of filesPerLambda(" + filesPerLambda + ").");
+                        "Number of JSON files must be a multiple of filesPerLambda (" + filesPerLambda + ").");
             }
             final int numberOfLambdas = numberOfJsonFiles / filesPerLambda;
             if (numberOfLambdas > 1000) {
