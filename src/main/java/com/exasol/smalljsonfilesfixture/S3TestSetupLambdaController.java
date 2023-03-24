@@ -227,8 +227,8 @@ class S3TestSetupLambdaController implements AutoCloseable {
             if (numberOfLambdas > 1000) {
                 throw new IllegalArgumentException("More then 1000 lambdas are currently not supported.");
             }
-            LOGGER.log(INFO, "Creating {0} files using {1} lambda functions.",
-                    new Object[] { numberOfJsonFiles, numberOfLambdas });
+            LOGGER.log(INFO, "Creating {0} files using {1} lambda functions in bucket {2}...",
+                    new Object[] { numberOfJsonFiles, numberOfLambdas, this.bucket });
             final Instant start = Instant.now();
             final List<CompletableFuture<InvokeResponse>> lambdaFutures = new ArrayList<>(numberOfLambdas);
             for (int lambdaCounter = 0; lambdaCounter < numberOfLambdas; lambdaCounter++) {
