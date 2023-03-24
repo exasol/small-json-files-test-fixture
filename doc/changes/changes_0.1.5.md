@@ -1,12 +1,12 @@
-# Small Json Files Test Fixture 0.1.5, released 2023-??-??
+# Small Json Files Test Fixture 0.1.5, released 2023-03-24
 
-Code name:
+Code name: Fix Lambda execution
 
 ## Summary
 
 ## Features
 
-* ISSUE_NUMBER: description
+* #18: Fixed lambda execution
 
 ## Dependency Updates
 
