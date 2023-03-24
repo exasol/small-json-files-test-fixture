@@ -39,12 +39,12 @@
 | ------------------------------------------------------- | ---------------------------------------------- |
 | [SonarQube Scanner for Maven][25]                       | [GNU LGPL 3][26]                               |
 | [Apache Maven Compiler Plugin][27]                      | [Apache License, Version 2.0][3]               |
-| [Apache Maven Enforcer Plugin][28]                      | [Apache License, Version 2.0][3]               |
+| [Apache Maven Enforcer Plugin][28]                      | [Apache-2.0][3]                                |
 | [Maven Flatten Plugin][29]                              | [Apache Software Licenese][3]                  |
 | [org.sonatype.ossindex.maven:ossindex-maven-plugin][30] | [ASL2][31]                                     |
 | [Maven Surefire Plugin][32]                             | [Apache License, Version 2.0][3]               |
 | [Versions Maven Plugin][33]                             | [Apache License, Version 2.0][3]               |
-| [Apache Maven Deploy Plugin][34]                        | [Apache License, Version 2.0][3]               |
+| [Apache Maven Deploy Plugin][34]                        | [Apache-2.0][3]                                |
 | [Apache Maven GPG Plugin][35]                           | [Apache License, Version 2.0][3]               |
 | [Apache Maven Source Plugin][36]                        | [Apache License, Version 2.0][3]               |
 | [Apache Maven Javadoc Plugin][37]                       | [Apache License, Version 2.0][3]               |
@@ -93,7 +93,7 @@
 [30]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [31]: http://www.apache.org/licenses/LICENSE-2.0.txt
 [32]: https://maven.apache.org/surefire/maven-surefire-plugin/
-[33]: https://www.mojohaus.org/versions-maven-plugin/
+[33]: https://www.mojohaus.org/versions/versions-maven-plugin/
 [34]: https://maven.apache.org/plugins/maven-deploy-plugin/
 [35]: https://maven.apache.org/plugins/maven-gpg-plugin/
 [36]: https://maven.apache.org/plugins/maven-source-plugin/
