@@ -5,9 +5,9 @@ const https = require('https');
  * @typedef {import("aws-lambda").Context} Context
  * @typedef {import("aws-lambda").Callback} Callback
  * @typedef {{ action: string }} Event
- * @typedef {{ numberOfFiles: any; offset: number; prefix: any; bucket: any; } & Event} CreateEvent
- * @typedef {{ bucket: string } & Event} DeleteAllEvent
- * @typedef {{ bucket: string, objects: string[] } & Event} DeleteListEvent
+ * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
+ * @typedef {Event & { bucket: string }} DeleteAllEvent
+ * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
  */
 
 /** Action for creating JSON files */

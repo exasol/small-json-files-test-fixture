@@ -2,11 +2,15 @@
   "name": "create-json-files-lambda",
   "version": "1.0.0",
   "scripts": {
-    "lint": "eslint ."
+    "eslint": "eslint .",
+    "typecheck": "tsc --project jsconfig.json",
+    "lint": "npm run eslint && npm run typecheck"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.114",
-    "eslint": "^8.36.0"
+    "@types/node": "^16.11.7",
+    "eslint": "^8.36.0",
+    "typescript": "^5.0.2"
   },
   "dependencies": {
     "aws-sdk": "^2.1342.0"
