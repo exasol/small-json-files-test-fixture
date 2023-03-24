@@ -53,13 +53,13 @@ async function doWithRetry(func) {
         try {
             await func();
             break;
-        } catch (exception) {
+        } catch (error) {
             if (retryCounter < 3) {
                 await delay(10000);
-                console.log(`Operation failed after ${retryCounter} retries: " ${exception}`);
+                console.log(`Operation failed after ${retryCounter} retries: " ${error}`);
                 retryCounter++;
             } else {
-                throw exception;
+                throw error;
             }
         }
     }
@@ -71,7 +71,8 @@ async function doWithRetry(func) {
  */
 async function handleCreate(event, context) {
     const s3 = getS3Client();
-    let promises = [];
+    /** @type Promise<unknown>[] */
+    const promises = [];
     const numberOfFiles = event.numberOfFiles;
     console.log(`Creating ${numberOfFiles} files...`);
     for (let i = 0; i < numberOfFiles; i++) {
@@ -93,8 +94,8 @@ async function handleCreate(event, context) {
     console.log("Waiting for creating to finish...")
     try {
         await Promise.all(promises)
-    } catch (exception) {
-        context.fail("failed to create s3 object: " + exception)
+    } catch (error) {
+        context.fail("failed to create s3 object: " + error)
     }
 }
 
@@ -105,7 +106,8 @@ async function handleCreate(event, context) {
 async function handleDelete(event, context) {
     const s3 = getS3Client();
     const lambdaClient = new AWS.Lambda();
-    let promises = [];
+    /** @type Promise<unknown>[] */
+    const promises = [];
     let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket }).promise();
     let totalObjectCount = 0;
 
@@ -137,9 +139,9 @@ async function handleDelete(event, context) {
     try {
         await Promise.all(promises);
         console.log(`Deleted ${totalObjectCount} objects`);
-    } catch (exception) {
-        context.fail("failed start delete-files lambda: " + exception);
-        throw exception;
+    } catch (error) {
+        context.fail("failed start delete-files lambda: " + error);
+        throw error;
     }
 }
 
@@ -149,7 +151,8 @@ async function handleDelete(event, context) {
  */
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
-    let promises = [];
+    /** @type Promise<unknown>[] */
+    const promises = [];
     console.log(`Deleting ${event.objects.length} objects...`)
     for (let key of event.objects) {
         const params = { Bucket: event.bucket, Key: key };
@@ -158,9 +161,9 @@ async function handleDeleteList(event, context) {
     }
     try {
         await Promise.all(promises);
-    } catch (exception) {
-        context.fail("failed to delete objects: " + exception);
-        throw exception;
+    } catch (error) {
+        context.fail("failed to delete objects: " + error);
+        throw error;
     }
 }
 
