@@ -50,8 +50,10 @@ async function doWithRetry(func) {
 
 async function handleCreate(event, context) {
     const s3 = getS3Client();
-    let promises = []
-    for (let i = 0; i < event.numberOfFiles; i++) {
+    let promises = [];
+    const numberOfFiles = event.numberOfFiles;
+    console.log(`Creating ${numberOfFiles} files...`);
+    for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
         const key = event.prefix + fileId + ".json";
         const data = {
@@ -67,6 +69,7 @@ async function handleCreate(event, context) {
         promises.push(doWithRetry(() => s3.upload(params).promise()));
         await delay(10)
     }
+    console.log("Waiting for creating to finish...")
     try {
         await Promise.all(promises)
     } catch (exception) {
@@ -112,7 +115,7 @@ async function handleDelete(event, context) {
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
     let promises = [];
-    console.log(`Deleting ${event.objects} objects...`)
+    console.log(`Deleting ${event.objects.length()} objects...`)
     for (let key of event.objects) {
         const params = { Bucket: event.bucket, Key: key };
         promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
