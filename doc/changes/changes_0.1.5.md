@@ -10,6 +10,21 @@ Code name:
 
 ## Dependency Updates
 
+### Compile Dependency Updates
+
+* Updated `com.exasol:error-reporting-java:1.0.0` to `1.0.1`
+* Updated `org.mockito:mockito-core:5.0.0` to `5.2.0`
+* Updated `software.amazon.awssdk:iam:2.19.23` to `2.20.31`
+* Updated `software.amazon.awssdk:lambda:2.19.23` to `2.20.31`
+* Updated `software.amazon.awssdk:netty-nio-client:2.19.23` to `2.20.31`
+* Updated `software.amazon.awssdk:s3:2.19.23` to `2.20.31`
+* Updated `software.amazon.awssdk:sts:2.19.23` to `2.20.31`
+
+### Test Dependency Updates
+
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.12.3` to `3.14.1`
+* Updated `org.slf4j:slf4j-jdk14:1.7.36` to `2.0.7`
+
 ### Plugin Dependency Updates
 
 * Updated `com.exasol:error-code-crawler-maven-plugin:1.2.1` to `1.2.2`
