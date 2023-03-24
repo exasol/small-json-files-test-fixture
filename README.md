@@ -43,6 +43,8 @@ new SmallJsonFilesTestSetup().setup(
 
 This will create the files in the bucket if it's not already there. It will **not** delete the setup. The idea is that you keep the files in your account.
 
+Currently only region eu-central-1 is supported.
+
 ## Costs
 
 Creating 1,000,000 S3 objects costs about $5. Compared to that storage is cheap, since the files are so small.
