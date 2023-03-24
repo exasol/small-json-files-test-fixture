@@ -20,6 +20,7 @@ pom.xml.versionsBackup
 *.old
 *.md.html
 test_config.properties
+/src/main/resources/createJsonFilesLambda/package-lock.json
 /src/main/resources/createJsonFilesLambda/node_modules/
 /.settings/org.eclipse.jdt.apt.core.prefs
 /.settings/org.eclipse.m2e.core.prefs
