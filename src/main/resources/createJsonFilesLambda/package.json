@@ -1,9 +1,14 @@
 {
   "name": "create-json-files-lambda",
   "version": "1.0.0",
-  "devDependencies": {},
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.114",
+    "eslint": "^8.36.0"
+  },
   "dependencies": {
-    "aws-sdk": "^2.1342.0",
-    "@types/aws-lambda": "^8.10.114"
+    "aws-sdk": "^2.1342.0"
   }
 }

@@ -30,7 +30,7 @@ function getS3Client() {
     });
 }
 
-exports.handler = async (/** @type Event */ event, /** @type Context */ context, /** Callback */ callback) => {
+exports.handler = async (/** @type Event */ event, /** @type Context */ context) => {
     if (event.action === ACTION_CREATE) {
         await handleCreate(/** @type {CreateEvent} */(event), context);
     } else if (event.action === ACTION_DELETE_ALL) {
@@ -48,6 +48,7 @@ exports.handler = async (/** @type Event */ event, /** @type Context */ context,
  */
 async function doWithRetry(func) {
     let retryCounter = 0;
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         try {
             await func();
@@ -107,6 +108,8 @@ async function handleDelete(event, context) {
     let promises = [];
     let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket }).promise();
     let totalObjectCount = 0;
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let objects = []
         for (let object of objectsPage.Contents) {

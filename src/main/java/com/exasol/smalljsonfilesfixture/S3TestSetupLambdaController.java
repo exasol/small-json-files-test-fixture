@@ -130,7 +130,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
         try (final LambdaClient lambdaClient = createLambdaClient()) {
             lambdaClient.createFunction(builder -> builder.functionName(this.lambdaFunctionName)
                     .architectures(Architecture.ARM64).code(codeBuilder -> codeBuilder.zipFile(zipBytes))
-                    .role(role.arn()).runtime(Runtime.NODEJS14_X).handler("createJsonFilesLambda.handler")
+                    .role(role.arn()).runtime(Runtime.NODEJS18_X).handler("createJsonFilesLambda.handler")
                     .timeout(15 * 60).tags(this.tags));
             sleep("lambda '" + this.lambdaFunctionName + "' being fully created", Duration.ofSeconds(5));
         }
