@@ -23,7 +23,6 @@ Code name:
 ### Test Dependency Updates
 
 * Updated `nl.jqno.equalsverifier:equalsverifier:3.12.3` to `3.14.1`
-* Updated `org.slf4j:slf4j-jdk14:1.7.36` to `2.0.7`
 
 ### Plugin Dependency Updates
 
