@@ -89,7 +89,7 @@ async function handleDelete(event, context) {
             bucket: event.bucket,
             objects: objects
         })
-        console.log(objects);
+        console.log("Calling lambda with params", callParams)
         promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
         await delay(5)
         if (objectsPage.NextContinuationToken) {
@@ -112,6 +112,7 @@ async function handleDelete(event, context) {
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
     let promises = [];
+    console.log(`Deleting ${event.objects} objects...`)
     for (let key of event.objects) {
         const params = { Bucket: event.bucket, Key: key };
         promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
