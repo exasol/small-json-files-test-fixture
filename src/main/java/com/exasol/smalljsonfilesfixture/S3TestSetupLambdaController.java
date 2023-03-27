@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.exasol.smalljsonfilesfixture.Packager.Package;
+
 import jakarta.json.*;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
@@ -61,7 +63,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     /**
      * Create a new instance of {@link S3TestSetupLambdaController}.
-     * 
+     *
      * @param tags                tags for the AWS resources
      * @param bucket              S3 Bucket
      * @param credentialsProvider AWS credentials provider
@@ -85,7 +87,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     /**
      * Create test files.
-     * 
+     *
      * @param numberOfJsonFiles total number of files
      * @param filesPerLambda    number of files to read per lambda function
      */
@@ -221,23 +223,22 @@ class S3TestSetupLambdaController implements AutoCloseable {
         }
     }
 
-    private void runLambdas(final int numberOfJsonFiles, final int filesPerLambda) {
-        if (numberOfJsonFiles % filesPerLambda != 0) {
-            throw new IllegalArgumentException(
-                    "Number of JSON files must be a multiple of filesPerLambda (" + filesPerLambda + ").");
-        }
+    private void runLambdas(final int files, final int filesPerLambda) {
+        final Packager packager = new Packager(files, filesPerLambda);
         try (final var asyncLambdaClient = createAsyncLambdaClient()) {
-            final int numberOfLambdas = numberOfJsonFiles / filesPerLambda;
-            if (numberOfLambdas > 1000) {
+            final int lambdas = packager.getNumberOfPackages();
+            if (lambdas > 1000) {
                 throw new IllegalArgumentException("More then 1000 lambdas are currently not supported.");
             }
             LOGGER.log(INFO, "Creating {0} files using {1} lambda functions in bucket {2}...",
-                    new Object[] { numberOfJsonFiles, numberOfLambdas, this.bucket });
+                    new Object[] { files, lambdas, this.bucket });
             final Instant start = Instant.now();
-            final List<CompletableFuture<InvokeResponse>> lambdaFutures = new ArrayList<>(numberOfLambdas);
-            for (int lambdaCounter = 0; lambdaCounter < numberOfLambdas; lambdaCounter++) {
-                final JsonObject event = createLambdaEvent(filesPerLambda, lambdaCounter);
-                final String lambdaDescription = "Lambda #" + lambdaCounter + " " + event.toString();
+            final List<CompletableFuture<InvokeResponse>> lambdaFutures = new ArrayList<>(lambdas);
+
+            while (packager.hasNext()) {
+                final Package p = packager.next();
+                final JsonObject event = createLambdaEvent(p.getSize(), p.getNumber());
+                final String lambdaDescription = "Lambda #" + p.getNumber() + " " + event.toString();
                 final var future = startLambda(event, asyncLambdaClient);
                 future.exceptionally(exception -> {
                     LOGGER.severe(lambdaDescription + " failed :" + exception.getMessage());
