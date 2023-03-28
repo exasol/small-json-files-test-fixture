@@ -66,11 +66,4 @@ class S3TestSetupLambdaControllerIT {
                 () -> controller.createFiles(2000, 1));
         assertThat(exception.getMessage(), equalTo("More then 1000 lambdas are currently not supported."));
     }
-
-    @Test
-    void testNotAMultiple() {
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> controller.createFiles(10, 3));
-        assertThat(exception.getMessage(), equalTo("Number of JSON files must be a multiple of filesPerLambda(3)."));
-    }
 }

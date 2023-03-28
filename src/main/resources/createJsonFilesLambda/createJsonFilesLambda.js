@@ -1,6 +1,20 @@
 const AWS = require('aws-sdk');
 const https = require('https');
 
+/**
+ * @typedef {import("aws-lambda").Context} Context
+ * @typedef {import("aws-lambda").Callback} Callback
+ * @typedef {{ action: string }} Event
+ * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
+ * @typedef {Event & { bucket: string }} DeleteAllEvent
+ * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
+ */
+
+/** Action for creating JSON files */
+const ACTION_CREATE = "create";
+/** Action for deleting all objects from a bucket */
+const ACTION_DELETE_ALL = "delete";
+/** Action for deleting a list of objects from a bucket */
 const ACTION_DELETE_LIST = "deleteList";
 
 const agent = new https.Agent({
@@ -16,42 +30,52 @@ function getS3Client() {
     });
 }
 
-exports.handler = async (event, context) => {
-    if (event.action === "create") {
-        await handleCreate(event, context);
-    } else if (event.action === "delete") {
-        await handleDelete(event, context);
+exports.handler = async (/** @type Event */ event, /** @type Context */ context) => {
+    if (event.action === ACTION_CREATE) {
+        await handleCreate(/** @type {CreateEvent} */(event), context);
+    } else if (event.action === ACTION_DELETE_ALL) {
+        await handleDelete(/** @type {DeleteAllEvent} */(event), context);
     } else if (event.action === ACTION_DELETE_LIST) {
-        await handleDeleteList(event, context);
+        await handleDeleteList(/** @type {DeleteListEvent} */(event), context);
     } else {
-        throw Error("Unknown action '" + event.action + "'")
+        throw Error(`Unknown action '${event.action}'`)
     }
 };
 
-
+/**
+ * Executes the given function at must three times with 10s delay.
+ * @param { () => Promise<unknown> } func
+ */
 async function doWithRetry(func) {
     let retryCounter = 0;
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         try {
             await func();
             break;
-        } catch (exception) {
+        } catch (error) {
             if (retryCounter < 3) {
                 await delay(10000);
-                console.log("operation failed: " + exception);
-                console.log("retrying");
+                console.log(`Operation failed after ${retryCounter} retries: " ${error}`);
                 retryCounter++;
             } else {
-                throw exception;
+                throw error;
             }
         }
     }
 }
 
+/**
+ * @param {CreateEvent} event
+ * @param {Context} context
+ */
 async function handleCreate(event, context) {
     const s3 = getS3Client();
-    let promises = []
-    for (let i = 0; i < event.numberOfFiles; i++) {
+    /** @type Promise<unknown>[] */
+    const promises = [];
+    const numberOfFiles = event.numberOfFiles;
+    console.log(`Creating ${numberOfFiles} files...`);
+    for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
         const key = event.prefix + fileId + ".json";
         const data = {
@@ -67,29 +91,39 @@ async function handleCreate(event, context) {
         promises.push(doWithRetry(() => s3.upload(params).promise()));
         await delay(10)
     }
+    console.log("Waiting for creating to finish...")
     try {
         await Promise.all(promises)
-    } catch (exception) {
-        context.fail("failed to create s3 object: " + exception)
+    } catch (error) {
+        context.fail("failed to create s3 object: " + error)
     }
 }
 
+/**
+ * @param {DeleteAllEvent} event
+ * @param {Context} context
+ */
 async function handleDelete(event, context) {
     const s3 = getS3Client();
     const lambdaClient = new AWS.Lambda();
-    let promises = [];
+    /** @type Promise<unknown>[] */
+    const promises = [];
     let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket }).promise();
+    let totalObjectCount = 0;
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         let objects = []
         for (let object of objectsPage.Contents) {
             objects.push(object.Key);
         }
+        totalObjectCount += objects.length;
         const callParams = JSON.stringify({
             action: ACTION_DELETE_LIST,
             bucket: event.bucket,
             objects: objects
         })
-        console.log(objects);
+        console.log(`Calling lambda to delete ${objects.length} objects`)
         promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
         await delay(5)
         if (objectsPage.NextContinuationToken) {
@@ -101,17 +135,25 @@ async function handleDelete(event, context) {
             break;
         }
     }
+    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalObjectCount} objects...`)
     try {
         await Promise.all(promises);
-    } catch (exception) {
-        context.fail("failed start delete-files lambda: " + exception);
-        throw exception;
+        console.log(`Deleted ${totalObjectCount} objects`);
+    } catch (error) {
+        context.fail("failed start delete-files lambda: " + error);
+        throw error;
     }
 }
 
+/**
+ * @param {DeleteListEvent} event
+ * @param {Context} context
+ */
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
-    let promises = [];
+    /** @type Promise<unknown>[] */
+    const promises = [];
+    console.log(`Deleting ${event.objects.length} objects...`)
     for (let key of event.objects) {
         const params = { Bucket: event.bucket, Key: key };
         promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
@@ -119,12 +161,15 @@ async function handleDeleteList(event, context) {
     }
     try {
         await Promise.all(promises);
-    } catch (exception) {
-        context.fail("failed to delete objects: " + exception);
-        throw exception;
+    } catch (error) {
+        context.fail("failed to delete objects: " + error);
+        throw error;
     }
 }
 
+/**
+ * @param {number} length
+ */
 function randomString(length) {
     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -134,6 +179,9 @@ function randomString(length) {
     return result;
 }
 
+/**
+ * @param {number} ms
+ */
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }

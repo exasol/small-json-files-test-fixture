@@ -1,7 +1,7 @@
 # Small Json Files Test Fixture
 
 [![Build Status](https://github.com/exasol/small-json-files-test-fixture/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/small-json-files-test-fixture/actions/workflows/ci-build.yml)
-[![Maven Central – Small Json Files Test Fixture](https://img.shields.io/maven-central/v/com.exasol/small-json-files-test-fixture)](https://search.maven.org/artifact/com.exasol/small-json-files-test-fixture)
+[![Maven Central &ndash; Small Json Files Test Fixture](https://img.shields.io/maven-central/v/com.exasol/small-json-files-test-fixture)](https://search.maven.org/artifact/com.exasol/small-json-files-test-fixture)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Asmall-json-files-test-fixture&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.exasol%3Asmall-json-files-test-fixture)
 
@@ -34,18 +34,20 @@ The setup consists of JSON files like:
 
 ```java
 new SmallJsonFilesTestSetup().setup(
-        Map.of("exa:project","MYPROJ","exa:owner","me@examle.com"),
+        Map.of("exa:project", "MYPROJ", "exa:owner", "me@example.com"),
         "myBucket",
         awsCredentialsProvider,
         1_000_000 /* total number of files */,
         20_000 /* files per lambda function */);
 ```
 
-This will create the files in the bucket if it's not already there. It will **not** delete the setup. The idea is that you keep the files in you account.
+This will create the files in the bucket if it's not already there. It will **not** delete the setup. The idea is that you keep the files in your account.
+
+Currently only region eu-central-1 is supported.
 
 ## Costs
 
-Creating 1_000_000 S3 objects costs about $5. Compared to that storage is cheap, since the files are so small.
+Creating 1,000,000 S3 objects costs about $5. Compared to that storage is cheap, since the files are so small.
 
 ## Additional Information
 
