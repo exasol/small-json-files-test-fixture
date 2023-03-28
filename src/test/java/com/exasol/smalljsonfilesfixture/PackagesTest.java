@@ -1,9 +1,9 @@
 package com.exasol.smalljsonfilesfixture;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.*;
+
+import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,9 +22,10 @@ class PackagesTest {
     void test(final int items, final int packageSize, final int expectedNumberOfPackages) {
         final Packager testee = new Packager(items, packageSize);
         assertThat(testee.getNumberOfPackages(), equalTo(expectedNumberOfPackages));
+        final Iterator<Package> iterator = testee.iterator();
         for (int i = 0; i < expectedNumberOfPackages; i++) {
-            assertThat(testee.hasNext(), is(true));
-            final Package p = testee.next();
+            assertThat(iterator.hasNext(), is(true));
+            final Package p = iterator.next();
             assertThat(i, equalTo(p.getNumber()));
             if (i < (expectedNumberOfPackages - 1)) {
                 assertThat(p.getSize(), equalTo(packageSize));
@@ -32,18 +33,14 @@ class PackagesTest {
                 assertThat((i * packageSize) + p.getSize(), equalTo(items));
             }
         }
-        assertThat(testee.hasNext(), is(false));
+        assertThat(iterator.hasNext(), is(false));
     }
 
     @Test
-    void testReset() {
+    void testReturnsNewIterator() {
         final Packager testee = new Packager(1, 1);
-        testee.next();
-        assertThat(testee.hasNext(), is(false));
-        assertThrows(IllegalStateException.class, () -> testee.next());
-        testee.reset();
-        assertThat(testee.hasNext(), is(true));
-        final Package p = testee.next();
-        assertThat(p.getSize(), equalTo(1));
+        final Iterator<Package> iterator1 = testee.iterator();
+        final Iterator<Package> iterator2 = testee.iterator();
+        assertThat(iterator1, not(sameInstance(iterator2)));
     }
 }

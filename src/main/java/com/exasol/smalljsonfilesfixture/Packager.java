@@ -1,5 +1,8 @@
 package com.exasol.smalljsonfilesfixture;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * This class does the book keeping for dividing an integer number of items into a number of packages.
  * <ul>
@@ -8,14 +11,18 @@ package com.exasol.smalljsonfilesfixture;
  * <li>Total number of items summarized for all packages identical to initial number of items
  * </ul>
  */
-public class Packager {
+class Packager implements Iterable<Packager.Package> {
 
     private final int itemsTotal;
     private final int packageSize;
-    private int itemsDelivered = 0;
-    private int packagesDelivered = 0;
 
-    public Packager(final int items, final int packageSize) {
+    /**
+     * Create a new instance.
+     * 
+     * @param items       the total number of items
+     * @param packageSize the maximum size of each package
+     */
+    Packager(final int items, final int packageSize) {
         this.itemsTotal = items;
         this.packageSize = packageSize;
     }
@@ -28,41 +35,35 @@ public class Packager {
         return 1 + ((this.itemsTotal - 1) / this.packageSize);
     }
 
-    /**
-     * @return whether there are more packages waiting to be delivered.
-     */
-    public boolean hasNext() {
-        return this.itemsDelivered < this.itemsTotal;
+    @Override
+    public Iterator<Packager.Package> iterator() {
+        return new PackageIterator();
     }
 
-    /**
-     * @return next {@link Package}.
-     * @throws IllegalStateException if there are no more packages waiting to be delivered.
-     */
-    public Package next() {
-        if (!hasNext()) {
-            throw new IllegalStateException("No more packages.");
+    private class PackageIterator implements Iterator<Package> {
+        private int itemsDelivered = 0;
+        private int packagesDelivered = 0;
+
+        @Override
+        public boolean hasNext() {
+            return this.itemsDelivered < itemsTotal;
         }
-        final int size = Math.min(remaining(), this.packageSize);
-        final Package packge = new Package(this.packagesDelivered, size);
-        this.packagesDelivered++;
-        this.itemsDelivered += size;
-        return packge;
-    }
 
-    /**
-     * Reset packages in order to deliver again.
-     *
-     * @return this for fluent programming
-     */
-    public Packager reset() {
-        this.packagesDelivered = 0;
-        this.itemsDelivered = 0;
-        return this;
-    }
+        @Override
+        public Package next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("No more packages.");
+            }
+            final int size = Math.min(remaining(), packageSize);
+            final Package pkg = new Package(this.packagesDelivered, size);
+            this.packagesDelivered++;
+            this.itemsDelivered += size;
+            return pkg;
+        }
 
-    private int remaining() {
-        return this.itemsTotal - this.itemsDelivered;
+        private int remaining() {
+            return itemsTotal - this.itemsDelivered;
+        }
     }
 
     /**

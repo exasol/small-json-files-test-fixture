@@ -235,8 +235,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
             final Instant start = Instant.now();
             final List<CompletableFuture<InvokeResponse>> lambdaFutures = new ArrayList<>(lambdas);
 
-            while (packager.hasNext()) {
-                final Package p = packager.next();
+            for (final Package p : packager) {
                 final JsonObject event = createLambdaEvent(p.getSize(), p.getNumber());
                 final String lambdaDescription = "Lambda #" + p.getNumber() + " " + event.toString();
                 final var future = startLambda(event, asyncLambdaClient);
