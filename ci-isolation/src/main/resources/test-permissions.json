@@ -27,7 +27,8 @@
         "lambda:DeleteFunction",
         "lambda:GetFunctionConfiguration",
         "lambda:InvokeFunction",
-        "lambda:GetFunction"
+        "lambda:GetFunction",
+        "lambda:TagResource"
       ],
       "Resource": "*"
     }
