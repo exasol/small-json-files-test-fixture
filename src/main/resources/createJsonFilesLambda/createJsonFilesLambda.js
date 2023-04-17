@@ -8,20 +8,26 @@ const https = require('https');
  * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
  * @typedef {Event & { bucket: string }} DeleteAllEvent
  * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
+ * @typedef {() => Promise<unknown>} AsyncFunction
  */
 
 /** Action for creating JSON files */
-const ACTION_CREATE = "create";
+const ACTION_CREATE = 'create';
 /** Action for deleting all objects from a bucket */
-const ACTION_DELETE_ALL = "delete";
+const ACTION_DELETE_ALL = 'delete';
 /** Action for deleting a list of objects from a bucket */
-const ACTION_DELETE_LIST = "deleteList";
+const ACTION_DELETE_LIST = 'deleteList';
 
 const agent = new https.Agent({
     keepAlive: true,
     maxSockets: 100
 });
 
+/**
+ * Create a new S3 client.
+ *
+ * @returns {AWS.S3} a new S3 client
+ */
 function getS3Client() {
     return new AWS.S3({
         httpOptions: {
@@ -30,7 +36,9 @@ function getS3Client() {
     });
 }
 
-exports.handler = async (/** @type Event */ event, /** @type Context */ context) => {
+// Formatter adds space after "async"
+// eslint-disable-next-line space-before-function-paren
+exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ context) => {
     if (event.action === ACTION_CREATE) {
         await handleCreate(/** @type {CreateEvent} */(event), context);
     } else if (event.action === ACTION_DELETE_ALL) {
@@ -38,13 +46,14 @@ exports.handler = async (/** @type Event */ event, /** @type Context */ context)
     } else if (event.action === ACTION_DELETE_LIST) {
         await handleDeleteList(/** @type {DeleteListEvent} */(event), context);
     } else {
-        throw Error(`Unknown action '${event.action}'`)
+        throw Error(`Unknown action '${event.action}'`);
     }
 };
 
 /**
  * Executes the given function at must three times with 10s delay.
- * @param { () => Promise<unknown> } func
+ *
+ * @param {AsyncFunction} func the function to execute with retry
  */
 async function doWithRetry(func) {
     let retryCounter = 0;
@@ -66,66 +75,66 @@ async function doWithRetry(func) {
 }
 
 /**
- * @param {CreateEvent} event
- * @param {Context} context
+ * @param {CreateEvent} event the event
+ * @param {Context} context the lambda context
  */
 async function handleCreate(event, context) {
     const s3 = getS3Client();
-    /** @type Promise<unknown>[] */
+    /** @type {Promise<unknown>[]} */
     const promises = [];
     const numberOfFiles = event.numberOfFiles;
     console.log(`Creating ${numberOfFiles} files...`);
     for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
-        const key = event.prefix + fileId + ".json";
+        const key = event.prefix + fileId + '.json';
         const data = {
             id: fileId,
             name: randomString(20)
         };
-        const json_data = JSON.stringify(data)
+        const jsonData = JSON.stringify(data);
         const params = {
             Bucket: event.bucket,
             Key: key,
-            Body: json_data
+            Body: jsonData
         };
         promises.push(doWithRetry(() => s3.upload(params).promise()));
-        await delay(10)
+        await delay(10);
     }
-    console.log("Waiting for creating to finish...")
+    console.log('Waiting for creating to finish...');
     try {
-        await Promise.all(promises)
+        await Promise.all(promises);
     } catch (error) {
-        context.fail("failed to create s3 object: " + error)
+        context.fail('failed to create s3 object: ' + error);
     }
 }
 
 /**
- * @param {DeleteAllEvent} event
- * @param {Context} context
+ * @param {DeleteAllEvent} event the event
+ * @param {Context} context the lambda context
  */
 async function handleDelete(event, context) {
     const s3 = getS3Client();
     const lambdaClient = new AWS.Lambda();
-    /** @type Promise<unknown>[] */
+    /** @type {Promise<unknown>[]} */
     const promises = [];
     let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket }).promise();
     let totalObjectCount = 0;
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        let objects = []
-        for (let object of objectsPage.Contents) {
+        const objects = [];
+        for (const object of objectsPage.Contents) {
             objects.push(object.Key);
         }
         totalObjectCount += objects.length;
         const callParams = JSON.stringify({
             action: ACTION_DELETE_LIST,
             bucket: event.bucket,
-            objects: objects
-        })
-        console.log(`Calling lambda to delete ${objects.length} objects`)
+            objects
+        });
+        console.log(`Calling lambda to delete ${objects.length} objects`);
         promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
-        await delay(5)
+        await delay(5);
         if (objectsPage.NextContinuationToken) {
             objectsPage = await s3.listObjectsV2({
                 Bucket: event.bucket,
@@ -135,43 +144,44 @@ async function handleDelete(event, context) {
             break;
         }
     }
-    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalObjectCount} objects...`)
+    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalObjectCount} objects...`);
     try {
         await Promise.all(promises);
         console.log(`Deleted ${totalObjectCount} objects`);
     } catch (error) {
-        context.fail("failed start delete-files lambda: " + error);
+        context.fail('failed start delete-files lambda: ' + error);
         throw error;
     }
 }
 
 /**
- * @param {DeleteListEvent} event
- * @param {Context} context
+ * @param {DeleteListEvent} event the event
+ * @param {Context} context the lambda context
  */
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
-    /** @type Promise<unknown>[] */
+    /** @type {Promise<unknown>[]} */
     const promises = [];
-    console.log(`Deleting ${event.objects.length} objects...`)
-    for (let key of event.objects) {
+    console.log(`Deleting ${event.objects.length} objects...`);
+    for (const key of event.objects) {
         const params = { Bucket: event.bucket, Key: key };
         promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
-        await delay(5)
+        await delay(5);
     }
     try {
         await Promise.all(promises);
     } catch (error) {
-        context.fail("failed to delete objects: " + error);
+        context.fail('failed to delete objects: ' + error);
         throw error;
     }
 }
 
 /**
- * @param {number} length
+ * @param {number} length length of the random string
+ * @returns {string} a random string of the given length
  */
 function randomString(length) {
-    let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -180,7 +190,8 @@ function randomString(length) {
 }
 
 /**
- * @param {number} ms
+ * @param {number} ms delay in milliseconds
+ * @returns {Promise<void>} promise
  */
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

@@ -4,9 +4,9 @@ Code name:
 
 ## Summary
 
-## Features
+## Refactoring
 
-* ISSUE_NUMBER: description
+* #22: Migrated CI isolation to AWS CDK v2
 
 ## Dependency Updates
 
