@@ -1,13 +1,26 @@
 {
-    "env": {
-        "browser": true,
-        "commonjs": true,
-        "es2022": true
-    },
-    "extends": "eslint:recommended",
-    "overrides": [],
-    "parserOptions": {
-        "ecmaVersion": 2022
-    },
-    "rules": {}
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es2022": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "standard",
+    "plugin:jsdoc/recommended-error"
+  ],
+  "overrides": [],
+  "parserOptions": {
+    "ecmaVersion": 2022
+  },
+  "rules": {
+    "semi": ["error", "always"],
+    "semi-style": ["error", "last"],
+    "space-before-function-paren": ["error", "never"],
+    "indent": ["error", 4]
+  },
+  "plugins": ["jsdoc"],
+  "settings": {
+    "jsdoc": { "mode": "typescript" }
+  }
 }
