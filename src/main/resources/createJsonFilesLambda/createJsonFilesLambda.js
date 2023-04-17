@@ -8,7 +8,6 @@ const https = require('https');
  * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
  * @typedef {Event & { bucket: string }} DeleteAllEvent
  * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
- * @typedef {() => Promise<unknown>} AsyncFunction
  */
 
 /** Action for creating JSON files */
@@ -53,7 +52,7 @@ exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ cont
 /**
  * Executes the given function at must three times with 10s delay.
  *
- * @param {AsyncFunction} func the function to execute with retry
+ * @param {() => Promise<unknown>} func the function to execute with retry
  */
 async function doWithRetry(func) {
     let retryCounter = 0;
