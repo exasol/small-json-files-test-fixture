@@ -159,16 +159,11 @@ async function handleDelete(event, context) {
  */
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
-    /** @type {Promise<unknown>[]} */
-    const promises = [];
     console.log(`Deleting ${event.objects.length} objects...`);
-    for (const key of event.objects) {
-        const params = { Bucket: event.bucket, Key: key };
-        promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
-        await delay(5);
-    }
+    const objectIds = event.objects.map((object) => { return { Key: object }; });
+    const param = { Bucket: event.bucket, Delete: { Objects: objectIds } };
     try {
-        await Promise.all(promises);
+        await doWithRetry(() => s3.deleteObjects(param).promise());
     } catch (error) {
         context.fail('failed to delete objects: ' + error);
         throw error;
