@@ -33,12 +33,6 @@
             <artifactId>s3</artifactId>
         </dependency>
         <dependency>
-            <!-- Explicitly upgrade transtivie dependency of software.amazon.awssdk:s3 to fix https://ossindex.sonatype.org/vulnerability/sonatype-2012-0050 -->
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.15</version>
-        </dependency>
-        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>error-reporting-java</artifactId>
             <version>1.0.1</version>
@@ -109,17 +103,6 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.sonatype.ossindex.maven</groupId>
-                <artifactId>ossindex-maven-plugin</artifactId>
-                <configuration>
-                    <excludeVulnerabilityIds>
-                        <!-- Transitive test dependency io.netty:netty-handler:4.1.77 used by software.amazon.awssdk:s3 -->
-                        <!-- We are not affected, see https://github.com/aws/aws-sdk-java-v2/issues/3263 for details -->
-                        <exclude>sonatype-2020-0026</exclude>
-                    </excludeVulnerabilityIds>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>

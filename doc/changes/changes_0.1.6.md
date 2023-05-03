@@ -14,6 +14,7 @@ Code name:
 
 #### Compile Dependency Updates
 
+* Removed `commons-codec:commons-codec:1.15`
 * Updated `org.mockito:mockito-core:5.2.0` to `5.3.1`
 * Updated `software.amazon.awssdk:iam:2.20.31` to `2.20.58`
 * Updated `software.amazon.awssdk:lambda:2.20.31` to `2.20.58`
