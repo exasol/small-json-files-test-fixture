@@ -120,5 +120,5 @@
 [49]: http://maven.apache.org/plugins/maven-jar-plugin/
 [50]: http://maven.apache.org/plugins/maven-install-plugin/
 [51]: http://maven.apache.org/plugins/maven-site-plugin/
-[52]: https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.1342.0.tgz
+[52]: https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.1370.0.tgz
 [53]: https://github.com/aws/aws-sdk-js

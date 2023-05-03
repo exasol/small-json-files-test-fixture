@@ -48,10 +48,17 @@ Code name:
 
 ### CreateJsonFilesLambda
 
+#### Compile Dependency Updates
+
+* Updated `aws-sdk:^2.1342.0` to `^2.1370.0`
+
 #### Development Dependency Updates
 
-* Added `eslint-plugin-n:^15.6.1`
+* Updated `eslint:^8.36.0` to `^8.39.0`
+* Added `eslint-plugin-n:^15.7.0`
 * Added `eslint-plugin-promise:^6.1.1`
 * Added `eslint-plugin-import:^2.27.5`
 * Added `eslint-config-standard:^17.0.0`
-* Added `eslint-plugin-jsdoc:^40.1.0`
+* Added `eslint-plugin-jsdoc:^43.1.1`
+* Updated `typescript:^5.0.2` to `^5.0.4`
+* Updated `@types/aws-lambda:^8.10.114` to `^8.10.115`
