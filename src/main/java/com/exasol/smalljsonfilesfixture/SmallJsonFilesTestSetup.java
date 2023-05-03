@@ -78,8 +78,9 @@ public class SmallJsonFilesTestSetup {
     private String getLambdaFunctionHash() {
         try {
             final var hashBuilder = MessageDigest.getInstance("SHA-256");
-            try (final InputStream lambdaAsStream = Objects
-                    .requireNonNull(getClass().getClassLoader().getResourceAsStream(CREATE_JSON_FILES_LAMBDA))) {
+            try (final InputStream lambdaAsStream = Objects.requireNonNull(
+                    getClass().getClassLoader().getResourceAsStream(CREATE_JSON_FILES_LAMBDA),
+                    "Resource " + CREATE_JSON_FILES_LAMBDA + " not found")) {
                 final byte[] byteArray = new byte[1024];
                 int readBytes = 0;
                 while ((readBytes = lambdaAsStream.read(byteArray)) != -1) {
