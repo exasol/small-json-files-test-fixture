@@ -86,15 +86,10 @@ async function handleCreate(event, context) {
     for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
         const key = event.prefix + fileId + '.json';
-        const data = {
-            id: fileId,
-            name: randomString(20)
-        };
-        const jsonData = JSON.stringify(data);
         const params = {
             Bucket: event.bucket,
             Key: key,
-            Body: jsonData
+            Body: generateJsonContent(fileId)
         };
         promises.push(doWithRetry(() => s3.upload(params).promise()));
         await delay(10);
@@ -105,6 +100,7 @@ async function handleCreate(event, context) {
     } catch (error) {
         context.fail('failed to create s3 object: ' + error);
     }
+    console.log('Creating finished.');
 }
 
 /**
@@ -179,6 +175,22 @@ async function handleDeleteList(event, context) {
 }
 
 /**
+ * Generate JSON file content with random content.
+ *
+ * @param {number} id id for the file content
+ * @returns {string} content in JSON format
+ */
+function generateJsonContent(id) {
+    const data = {
+        id,
+        name: randomString(20)
+    };
+    return JSON.stringify(data);
+}
+
+/**
+ * Generate a random string of the given length.
+ *
  * @param {number} length length of the random string
  * @returns {string} a random string of the given length
  */
@@ -192,8 +204,10 @@ function randomString(length) {
 }
 
 /**
+ * Return a promise that waits for the given delay.
+ *
  * @param {number} ms delay in milliseconds
- * @returns {Promise<void>} promise
+ * @returns {Promise<void>} promise that waits for the given delay
  */
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
