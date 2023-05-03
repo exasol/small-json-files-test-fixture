@@ -52,9 +52,10 @@ exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ cont
 /**
  * Executes the given function at must three times with 10s delay.
  *
+ * @param {string} operation name of the operation to perform. This is used in log messages.
  * @param {() => Promise<unknown>} func the function to execute with retry
  */
-async function doWithRetry(func) {
+async function doWithRetry(operation, func) {
     let retryCounter = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -62,9 +63,9 @@ async function doWithRetry(func) {
             await func();
             break;
         } catch (error) {
+            console.log(`Operation ${operation} failed after ${retryCounter} retries: ${error}`);
             if (retryCounter < 3) {
                 await delay(10000);
-                console.log(`Operation failed after ${retryCounter} retries: " ${error}`);
                 retryCounter++;
             } else {
                 throw error;
@@ -91,7 +92,7 @@ async function handleCreate(event, context) {
             Key: key,
             Body: generateJsonContent(fileId)
         };
-        promises.push(doWithRetry(() => s3.upload(params).promise()));
+        promises.push(doWithRetry(`Upload file #${fileId}`, () => s3.upload(params).promise()));
         await delay(10);
     }
     console.log('Waiting for creating to finish...');
@@ -167,7 +168,7 @@ async function handleDeleteList(event, context) {
     const objectIds = event.objects.map((object) => { return { Key: object }; });
     const param = { Bucket: event.bucket, Delete: { Objects: objectIds } };
     try {
-        await doWithRetry(() => s3.deleteObjects(param).promise());
+        await doWithRetry(`Delete ${objectIds.length} files`, () => s3.deleteObjects(param).promise());
     } catch (error) {
         context.fail('failed to delete objects: ' + error);
         throw error;
