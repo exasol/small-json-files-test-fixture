@@ -83,7 +83,7 @@ async function handleCreate(event, context) {
     /** @type {Promise<unknown>[]} */
     const promises = [];
     const numberOfFiles = event.numberOfFiles;
-    console.log(`Creating ${numberOfFiles} files...`);
+    console.log(`Creating ${numberOfFiles} files in bucket '${event.bucket}'...`);
     for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
         const key = event.prefix + fileId + '.json';
@@ -105,6 +105,8 @@ async function handleCreate(event, context) {
 }
 
 /**
+ * Delete all objects in the given bucket.
+ *
  * @param {DeleteAllEvent} event the event
  * @param {Context} context the lambda context
  */
@@ -129,7 +131,7 @@ async function handleDelete(event, context) {
             objects
         });
         if (objects.length > 0) {
-            console.log(`Calling lambda to delete ${objects.length} objects`);
+            console.log(`Calling lambda to delete ${objects.length} objects from bucket '${event.bucket}'`);
             promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
             await delay(5);
         } else {
@@ -143,6 +145,10 @@ async function handleDelete(event, context) {
         } else {
             break;
         }
+    }
+    if (promises.length === 0) {
+        console.log(`No objects to delete from bucket ${event.bucket}`);
+        return;
     }
     console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalObjectCount} objects...`);
     try {
