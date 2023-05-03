@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.*;
@@ -55,7 +54,7 @@ class SmallJsonFilesTestSetupIT {
     @Test
     void testManyFilesPerLambda() throws IOException {
         final int count = 20_000;
-        final int countPerLambda = 20_000;
+        final int countPerLambda = count;
         createSetup(count, countPerLambda);
         assertThat(countDataFiles(s3Client, bucketName), equalTo(count));
     }
