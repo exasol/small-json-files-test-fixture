@@ -131,9 +131,13 @@ async function handleDelete(event, context) {
             bucket: event.bucket,
             objects
         });
-        console.log(`Calling lambda to delete ${objects.length} objects`);
-        promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
-        await delay(5);
+        if (objects.length > 0) {
+            console.log(`Calling lambda to delete ${objects.length} objects`);
+            promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
+            await delay(5);
+        } else {
+            console.log('No more objects to delete, no need to call lambda');
+        }
         if (objectsPage.NextContinuationToken) {
             objectsPage = await s3.listObjectsV2({
                 Bucket: event.bucket,
@@ -159,7 +163,11 @@ async function handleDelete(event, context) {
  */
 async function handleDeleteList(event, context) {
     const s3 = getS3Client();
-    console.log(`Deleting ${event.objects.length} objects...`);
+    if (event.objects.length === 0) {
+        console.log(`No objects given to delete from ${event.bucket}: nothing to do`);
+        return;
+    }
+    console.log(`Deleting ${event.objects.length} objects from ${event.bucket}...`);
     const objectIds = event.objects.map((object) => { return { Key: object }; });
     const param = { Bucket: event.bucket, Delete: { Objects: objectIds } };
     try {
