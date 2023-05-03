@@ -153,9 +153,13 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private SdkAsyncHttpClient getHttpClientWithIncreasedTimeouts() {
-        return NettyNioAsyncHttpClient.builder().readTimeout(Duration.ofMinutes(16))
-                .connectionAcquisitionTimeout(Duration.ofMinutes(1)).writeTimeout(Duration.ofMinutes(1))
-                .connectionTimeout(Duration.ofMinutes(1)).maxConcurrency(600).build();
+        return NettyNioAsyncHttpClient.builder() //
+                .readTimeout(Duration.ofMinutes(16)) //
+                .connectionAcquisitionTimeout(Duration.ofMinutes(1)) //
+                .writeTimeout(Duration.ofMinutes(1)) //
+                .connectionTimeout(Duration.ofMinutes(1)) //
+                .maxConcurrency(600) //
+                .build();
     }
 
     private Role createRoleForLambda() {
@@ -239,7 +243,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
             for (final Package p : packager) {
                 final JsonObject event = createLambdaEvent(p.getSize(), p.getNumber());
                 final String lambdaDescription = "Lambda #" + p.getNumber() + " " + event.toString();
-                final var future = startLambda(event, asyncLambdaClient);
+                final CompletableFuture<InvokeResponse> future = startLambda(event, asyncLambdaClient);
                 future.exceptionally(exception -> {
                     LOGGER.severe(lambdaDescription + " failed: " + exception.getMessage());
                     throw new IllegalStateException("Failed to run lambda #" + p.getNumber(), exception);
@@ -288,7 +292,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
     /**
      * Get the result of a {@link CompletableFuture} by calling {@link CompletableFuture#get()} and handle the checked
      * exceptions. Use this method in cases where no checked exceptions are allowed.
-     * 
+     *
      * @param <T>    type of the result
      * @param future the future from which to get the result
      * @return the result
@@ -308,20 +312,19 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     private CompletableFuture<InvokeResponse> startLambda(final JsonObject event,
             final LambdaAsyncClient asyncLambdaClient) {
-        try {
-            final byte[] serializedEvent = serializeJson(event);
-            return asyncLambdaClient.invoke(request -> request.functionName(this.lambdaFunctionName)
-                    .invocationType(InvocationType.REQUEST_RESPONSE).payload(SdkBytes.fromByteArray(serializedEvent)));
-        } catch (final IOException exception) {
-            throw new UncheckedIOException("Failed to start lambda function.", exception);
-        }
+        final byte[] serializedEvent = serializeJson(event);
+        return asyncLambdaClient.invoke(request -> request.functionName(this.lambdaFunctionName) //
+                .invocationType(InvocationType.REQUEST_RESPONSE) //
+                .payload(SdkBytes.fromByteArray(serializedEvent)));
     }
 
-    private byte[] serializeJson(final JsonObject json) throws IOException {
+    private byte[] serializeJson(final JsonObject json) {
         try (final ByteArrayOutputStream bufferStream = new ByteArrayOutputStream();
                 final JsonWriter jsonWriter = Json.createWriter(bufferStream)) {
             jsonWriter.write(json);
             return bufferStream.toByteArray();
+        } catch (final IOException exception) {
+            throw new UncheckedIOException("Failed to serialize json object " + json, exception);
         }
     }
 
