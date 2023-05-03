@@ -1,6 +1,7 @@
 package com.exasol.smalljsonfilesfixture;
 
 import static java.util.logging.Level.INFO;
+import static java.util.stream.Collectors.toList;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -263,22 +264,46 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     private void waitForLambdasToFinish(final List<CompletableFuture<InvokeResponse>> lambdaFutures) {
         LOGGER.info(() -> "Waiting for " + lambdaFutures.size() + " to finish...");
+        final CompletableFuture<Void> combinedFuture = CompletableFuture
+                .allOf(lambdaFutures.toArray(CompletableFuture[]::new));
         try {
-            final CompletableFuture<Void> combinedFuture = CompletableFuture
-                    .allOf(lambdaFutures.toArray(CompletableFuture[]::new));
             combinedFuture.get();
-            for (final var future : lambdaFutures) {
-                final InvokeResponse invokeResponse = future.get();
-                if (invokeResponse.functionError() != null) {
-                    throw new IllegalStateException("Failed to run lambda function: "
-                            + invokeResponse.payload().asString(StandardCharsets.UTF_8));
-                }
+            final List<String> errorMessages = lambdaFutures.stream().map(this::getFuture) //
+                    .map(InvokeResponse::functionError) //
+                    .filter(Objects::nonNull) //
+                    .collect(toList());
+            if (!errorMessages.isEmpty()) {
+                throw new IllegalStateException(
+                        "Execution of " + errorMessages.size() + " lambdas failed: " + errorMessages);
+            } else {
+                LOGGER.info(() -> "All " + lambdaFutures.size() + " finished successfully");
             }
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while running lambda functions.", exception);
         } catch (final ExecutionException exception) {
             throw new IllegalStateException("One or more lambda functions failed.", exception);
+        }
+    }
+
+    /**
+     * Get the result of a {@link CompletableFuture} by calling {@link CompletableFuture#get()} and handle the checked
+     * exceptions. Use this method in cases where no checked exceptions are allowed.
+     * 
+     * @param <T>    type of the result
+     * @param future the future from which to get the result
+     * @return the result
+     * @throws IllegalStateException in case the future throws an {@link InterruptedException} or
+     *                               {@link ExecutionException}
+     */
+    private <T> T getFuture(final CompletableFuture<T> future) {
+        try {
+            return future.get();
+        } catch (final InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to get result of future " + future, exception);
+        } catch (final ExecutionException exception) {
+            throw new IllegalStateException("Failed to get result of future " + future, exception);
         }
     }
 
