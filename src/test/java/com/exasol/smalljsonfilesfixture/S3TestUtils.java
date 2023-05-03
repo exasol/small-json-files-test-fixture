@@ -3,11 +3,11 @@ package com.exasol.smalljsonfilesfixture;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 public class S3TestUtils {
     private static final Logger LOG = Logger.getLogger(S3TestUtils.class.getName());
@@ -23,20 +23,33 @@ public class S3TestUtils {
 
     public static void emptyS3Bucket(final String bucketName, final S3Client s3Client) {
         LOG.info(() -> "Deleting all objects from bucket " + bucketName + "...");
-        final ListObjectsV2Iterable pages = s3Client
-                .listObjectsV2Paginator(request -> request.bucket(bucketName).maxKeys(MAX_COUNT_PER_DELETE_REQUEST));
-        pages.stream().map(page -> createDeleteRequest(bucketName, page)) //
-                .forEach(s3Client::deleteObjects);
+        s3Client.listObjectsV2Paginator(request -> request.bucket(bucketName).maxKeys(MAX_COUNT_PER_DELETE_REQUEST)) //
+                .stream() //
+                .map(page -> createDeleteRequest(bucketName, page)) //
+                .filter(Optional::isPresent) //
+                .map(Optional::get) //
+                .forEach(request -> {
+                    LOG.info(() -> "Deleting " + request.delete().objects().size() + " objects...");
+                    s3Client.deleteObjects(request);
+                });
     }
 
-    private static DeleteObjectsRequest createDeleteRequest(final String bucketName,
+    private static Optional<DeleteObjectsRequest> createDeleteRequest(final String bucketName,
             final ListObjectsV2Response listResponse) {
-        final List<ObjectIdentifier> objects = listResponse.contents().stream().map(S3TestUtils::objectId) //
+        final List<S3Object> s3Objects = listResponse.contents();
+        if (s3Objects.isEmpty()) {
+            return Optional.empty();
+        }
+        if (s3Objects.size() > MAX_COUNT_PER_DELETE_REQUEST) {
+            throw new IllegalArgumentException(
+                    "Trying to delete more than " + MAX_COUNT_PER_DELETE_REQUEST + " objects: " + s3Objects.size());
+        }
+        final List<ObjectIdentifier> objects = s3Objects.stream().map(S3TestUtils::objectId) //
                 .collect(toList());
-        return DeleteObjectsRequest.builder() //
+        return Optional.of(DeleteObjectsRequest.builder() //
                 .bucket(bucketName) //
                 .delete(delete -> delete.objects(objects)) //
-                .build();
+                .build());
     }
 
     private static ObjectIdentifier objectId(final S3Object object) {
