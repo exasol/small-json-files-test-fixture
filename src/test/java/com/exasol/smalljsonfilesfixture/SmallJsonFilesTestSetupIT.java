@@ -18,7 +18,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 class SmallJsonFilesTestSetupIT {
     private static final Logger LOG = Logger.getLogger(SmallJsonFilesTestSetupIT.class.getName());
     private static final TestConfig TEST_CONFIG = TestConfig.instance();
-    private static final Map<String, String> TAGS = Map.of("exa:owner", TEST_CONFIG.getOwner(), "exa:project", "SJFTF");
     private static S3Client s3Client;
     private static String bucketName;
 
@@ -66,8 +65,8 @@ class SmallJsonFilesTestSetupIT {
     }
 
     private void createSetup(final int fileCount, final int filesPerLambda) throws IOException {
-        new SmallJsonFilesTestSetup().setup(TAGS, bucketName, TEST_CONFIG.getAwsCredentialsProvider(), fileCount,
-                filesPerLambda);
+        new SmallJsonFilesTestSetup().setup(TEST_CONFIG.getTags(), bucketName, TEST_CONFIG.getAwsCredentialsProvider(),
+                fileCount, filesPerLambda);
     }
 
     @Test

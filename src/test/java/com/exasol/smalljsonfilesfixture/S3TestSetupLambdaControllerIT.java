@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.junit.jupiter.api.*;
 
@@ -23,8 +22,7 @@ class S3TestSetupLambdaControllerIT {
     @BeforeAll
     static void beforeAll() throws IOException {
         bucketName = "small-json-files-test-fixture-" + System.currentTimeMillis();
-        controller = S3TestSetupLambdaController.create(
-                Map.of("exa:owner", TEST_CONFIG.getOwner(), "exa:project", "SJFTF"), bucketName,
+        controller = S3TestSetupLambdaController.create(TEST_CONFIG.getTags(), bucketName,
                 TEST_CONFIG.getAwsCredentialsProvider());
         s3Client = S3Client.builder().credentialsProvider(TEST_CONFIG.getAwsCredentialsProvider()).build();
         s3Client.createBucket(request -> request.bucket(bucketName));
