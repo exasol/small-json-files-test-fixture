@@ -24,7 +24,6 @@ const agent = new https.Agent({
 
 /**
  * Create a new S3 client.
- *
  * @returns {AWS.S3} a new S3 client
  */
 function getS3Client() {
@@ -51,7 +50,6 @@ exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ cont
 
 /**
  * Executes the given function at must three times with 10s delay.
- *
  * @param {string} operation name of the operation to perform. This is used in log messages.
  * @param {() => Promise<unknown>} func the function to execute with retry
  */
@@ -106,7 +104,6 @@ async function handleCreate(event, context) {
 
 /**
  * Delete all objects in the given bucket.
- *
  * @param {DeleteAllEvent} event the event
  * @param {Context} context the lambda context
  */
@@ -183,7 +180,6 @@ async function handleDeleteList(event, context) {
 
 /**
  * Generate JSON file content with random content.
- *
  * @param {number} id id for the file content
  * @returns {string} content in JSON format
  */
@@ -197,7 +193,6 @@ function generateJsonContent(id) {
 
 /**
  * Generate a random string of the given length.
- *
  * @param {number} length length of the random string
  * @returns {string} a random string of the given length
  */
@@ -212,7 +207,6 @@ function randomString(length) {
 
 /**
  * Return a promise that waits for the given delay.
- *
  * @param {number} ms delay in milliseconds
  * @returns {Promise<void>} promise that waits for the given delay
  */
