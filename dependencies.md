@@ -23,7 +23,6 @@
 | Dependency                                | License                           |
 | ----------------------------------------- | --------------------------------- |
 | [Hamcrest][13]                            | [BSD License 3][14]               |
-| [JUnit Jupiter Engine][15]                | [Eclipse Public License v2.0][16] |
 | [JUnit Jupiter Params][15]                | [Eclipse Public License v2.0][16] |
 | [EqualsVerifier | release normal jar][17] | [Apache License, Version 2.0][3]  |
 | [SLF4J JDK14 Binding][18]                 | [MIT License][19]                 |

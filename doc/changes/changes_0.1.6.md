@@ -12,6 +12,24 @@ Code name:
 
 ### Small Json Files Test Fixture
 
+#### Compile Dependency Updates
+
+* Updated `org.mockito:mockito-core:5.2.0` to `5.3.1`
+* Updated `software.amazon.awssdk:iam:2.20.31` to `2.20.58`
+* Updated `software.amazon.awssdk:lambda:2.20.31` to `2.20.58`
+* Updated `software.amazon.awssdk:netty-nio-client:2.20.31` to `2.20.58`
+* Updated `software.amazon.awssdk:s3:2.20.31` to `2.20.58`
+* Updated `software.amazon.awssdk:sts:2.20.31` to `2.20.58`
+
+#### Runtime Dependency Updates
+
+* Updated `org.eclipse:yasson:3.0.2` to `3.0.3`
+
+#### Test Dependency Updates
+
+* Removed `org.junit.jupiter:junit-jupiter-engine:5.9.2`
+* Updated `org.junit.jupiter:junit-jupiter-params:5.9.2` to `5.9.3`
+
 #### Plugin Dependency Updates
 
 * Updated `com.exasol:error-code-crawler-maven-plugin:1.2.2` to `1.2.3`
