@@ -7,15 +7,12 @@ const https = require('https');
  * @typedef {{ action: string }} Event
  * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
  * @typedef {Event & { bucket: string }} DeleteAllEvent
- * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
  */
 
 /** Action for creating JSON files */
 const ACTION_CREATE = 'create';
 /** Action for deleting all objects from a bucket */
 const ACTION_DELETE_ALL = 'delete';
-/** Action for deleting a list of objects from a bucket */
-const ACTION_DELETE_LIST = 'deleteList';
 
 const agent = new https.Agent({
     keepAlive: true,
@@ -41,8 +38,6 @@ exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ cont
         await handleCreate(/** @type {CreateEvent} */(event), context);
     } else if (event.action === ACTION_DELETE_ALL) {
         await handleDelete(/** @type {DeleteAllEvent} */(event), context);
-    } else if (event.action === ACTION_DELETE_LIST) {
-        await handleDeleteList(/** @type {DeleteListEvent} */(event), context);
     } else {
         throw Error(`Unknown action '${event.action}'`);
     }
@@ -103,33 +98,34 @@ async function handleCreate(event, context) {
 }
 
 /**
+ * The deleteObjects() request must contain 1,000 or less objects, else it will fail with the following error
+ * message:
+ *
+ * The XML you provided was not well-formed or did not validate against our published schema
+ */
+const MAX_COUNT_PER_DELETE_REQUEST = 1000;
+
+/**
  * Delete all objects in the given bucket.
  * @param {DeleteAllEvent} event the event
  * @param {Context} context the lambda context
  */
 async function handleDelete(event, context) {
     const s3 = getS3Client();
-    const lambdaClient = new AWS.Lambda();
     /** @type {Promise<unknown>[]} */
     const promises = [];
-    let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket }).promise();
+    let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket, MaxKeys: MAX_COUNT_PER_DELETE_REQUEST }).promise();
     let totalObjectCount = 0;
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const objects = [];
-        for (const object of objectsPage.Contents) {
-            objects.push(object.Key);
-        }
-        totalObjectCount += objects.length;
-        const callParams = JSON.stringify({
-            action: ACTION_DELETE_LIST,
-            bucket: event.bucket,
-            objects
-        });
-        if (objects.length > 0) {
-            console.log(`Calling lambda to delete ${objects.length} objects from bucket '${event.bucket}'`);
-            promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
+        totalObjectCount += objectsPage.Contents.length;
+        if (objectsPage.Contents.length > 0) {
+            console.log(`Deleting ${objectsPage.Contents.length} objects from bucket '${event.bucket}'`);
+            const objectIds = objectsPage.Contents.map((object) => { return { Key: object.Key }; });
+            const param = { Bucket: event.bucket, Delete: { Objects: objectIds } };
+            const promise = doWithRetry(`Delete ${objectsPage.Contents.length} files`, () => s3.deleteObjects(param).promise());
+            promises.push(promise);
             await delay(5);
         } else {
             console.log('No more objects to delete, no need to call lambda');
@@ -153,27 +149,6 @@ async function handleDelete(event, context) {
         console.log(`Deleted ${totalObjectCount} objects`);
     } catch (error) {
         context.fail('failed start delete-files lambda: ' + error);
-        throw error;
-    }
-}
-
-/**
- * @param {DeleteListEvent} event the event
- * @param {Context} context the lambda context
- */
-async function handleDeleteList(event, context) {
-    const s3 = getS3Client();
-    if (event.objects.length === 0) {
-        console.log(`No objects given to delete from ${event.bucket}: nothing to do`);
-        return;
-    }
-    console.log(`Deleting ${event.objects.length} objects from ${event.bucket}...`);
-    const objectIds = event.objects.map((object) => { return { Key: object }; });
-    const param = { Bucket: event.bucket, Delete: { Objects: objectIds } };
-    try {
-        await doWithRetry(`Delete ${objectIds.length} files`, () => s3.deleteObjects(param).promise());
-    } catch (error) {
-        context.fail('failed to delete objects: ' + error);
         throw error;
     }
 }
