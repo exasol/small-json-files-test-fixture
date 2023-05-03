@@ -153,11 +153,12 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private SdkAsyncHttpClient getHttpClientWithIncreasedTimeouts() {
+        final Duration timeout = Duration.ofMinutes(16);
         return NettyNioAsyncHttpClient.builder() //
                 .readTimeout(Duration.ofMinutes(16)) //
-                .connectionAcquisitionTimeout(Duration.ofMinutes(1)) //
-                .writeTimeout(Duration.ofMinutes(1)) //
-                .connectionTimeout(Duration.ofMinutes(1)) //
+                .connectionAcquisitionTimeout(timeout) //
+                .writeTimeout(timeout) //
+                .connectionTimeout(timeout) //
                 .maxConcurrency(600) //
                 .build();
     }
