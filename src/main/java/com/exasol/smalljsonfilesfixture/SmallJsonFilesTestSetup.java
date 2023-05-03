@@ -60,7 +60,7 @@ public class SmallJsonFilesTestSetup {
             final AwsCredentialsProvider credentialsProvider, final String bucket) {
         final Optional<TestSetupDescription> actualSetup = fetchSetupDescription(credentialsProvider, bucket);
         if (actualSetup.isEmpty()) {
-            LOGGER.info(() -> "Setup description does not exist at " + SETUP_DESCRIPTION_KEY);
+            LOGGER.info(() -> "Setup description does not exist at s3://" + bucket + "/" + SETUP_DESCRIPTION_KEY);
             return false;
         } else {
             if (!actualSetup.get().equals(requestedSetup)) {

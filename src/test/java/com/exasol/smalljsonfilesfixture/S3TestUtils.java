@@ -1,13 +1,19 @@
 package com.exasol.smalljsonfilesfixture;
 
+import java.util.logging.Logger;
+
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 public class S3TestUtils {
+    private static final Logger LOG = Logger.getLogger(S3TestUtils.class.getName());
+
     public static void emptyS3Bucket(final String bucketName, final S3Client s3Client) {
+        LOG.info(() -> "Deleting all objects from bucket " + bucketName + "...");
         final ListObjectsV2Iterable pages = s3Client.listObjectsV2Paginator(request -> request.bucket(bucketName));
         for (final ListObjectsV2Response page : pages) {
+            LOG.fine(() -> "Deleting " + page.contents().size() + " objects from bucket " + bucketName + "...");
             page.contents().forEach(
                     s3Object -> s3Client.deleteObject(builder -> builder.bucket(bucketName).key(s3Object.key())));
         }
