@@ -238,6 +238,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
             for (final Package p : packager) {
                 final JsonObject event = createLambdaEvent(p.getSize(), p.getNumber());
                 final String lambdaDescription = "Lambda #" + p.getNumber() + " " + event.toString();
+                LOGGER.info("Starting lambda #" + p.getNumber() + "...");
                 final var future = startLambda(event, asyncLambdaClient);
                 future.exceptionally(exception -> {
                     LOGGER.severe(lambdaDescription + " failed :" + exception.getMessage());
@@ -261,6 +262,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private void waitForLambdasToFinish(final List<CompletableFuture<InvokeResponse>> lambdaFutures) {
+        LOGGER.info(() -> "Waiting for " + lambdaFutures.size() + " to finish...");
         try {
             final CompletableFuture<Void> combinedFuture = CompletableFuture
                     .allOf(lambdaFutures.toArray(CompletableFuture[]::new));
