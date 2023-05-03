@@ -239,11 +239,10 @@ class S3TestSetupLambdaController implements AutoCloseable {
             for (final Package p : packager) {
                 final JsonObject event = createLambdaEvent(p.getSize(), p.getNumber());
                 final String lambdaDescription = "Lambda #" + p.getNumber() + " " + event.toString();
-                LOGGER.info("Starting lambda #" + p.getNumber() + "...");
                 final var future = startLambda(event, asyncLambdaClient);
                 future.exceptionally(exception -> {
-                    LOGGER.severe(lambdaDescription + " failed :" + exception.getMessage());
-                    throw new IllegalStateException("Failed to run lambda", exception);
+                    LOGGER.severe(lambdaDescription + " failed: " + exception.getMessage());
+                    throw new IllegalStateException("Failed to run lambda #" + p.getNumber(), exception);
                 });
                 lambdaFutures.add(future);
             }
@@ -263,7 +262,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private void waitForLambdasToFinish(final List<CompletableFuture<InvokeResponse>> lambdaFutures) {
-        LOGGER.info(() -> "Waiting for " + lambdaFutures.size() + " to finish...");
+        LOGGER.info(() -> "Waiting for " + lambdaFutures.size() + " lambdas to finish...");
         final CompletableFuture<Void> combinedFuture = CompletableFuture
                 .allOf(lambdaFutures.toArray(CompletableFuture[]::new));
         try {
@@ -276,7 +275,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
                 throw new IllegalStateException(
                         "Execution of " + errorMessages.size() + " lambdas failed: " + errorMessages);
             } else {
-                LOGGER.info(() -> "All " + lambdaFutures.size() + " finished successfully");
+                LOGGER.info(() -> "All " + lambdaFutures.size() + " lambdas finished successfully");
             }
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
