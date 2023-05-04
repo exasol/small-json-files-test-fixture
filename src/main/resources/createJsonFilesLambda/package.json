@@ -1,6 +1,7 @@
 {
   "name": "create-json-files-lambda",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "eslint": "eslint .",
     "typecheck": "tsc --project jsconfig.json",
@@ -8,7 +9,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.115",
-    "@types/node": "^16.11.7",
+    "@types/node": "^18.16.3",
     "eslint": "^8.39.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
@@ -18,6 +19,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "aws-sdk": "^2.1370.0"
+    "@aws-sdk/client-lambda": "^3.326.0",
+    "@aws-sdk/client-s3": "^3.326.0"
   }
 }

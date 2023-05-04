@@ -1,5 +1,5 @@
-const AWS = require('aws-sdk');
-const https = require('https');
+import { InvokeCommand, Lambda, LogType } from '@aws-sdk/client-lambda';
+import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 /**
  * @typedef {import("aws-lambda").Context} Context
@@ -7,41 +7,43 @@ const https = require('https');
  * @typedef {{ action: string }} Event
  * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
  * @typedef {Event & { bucket: string }} DeleteAllEvent
+ * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
+ * @typedef {import('@aws-sdk/client-s3')._Object} S3Object
  */
 
 /** Action for creating JSON files */
 const ACTION_CREATE = 'create';
 /** Action for deleting all objects from a bucket */
 const ACTION_DELETE_ALL = 'delete';
+/** Action for deleting a list of objects from a bucket */
+const ACTION_DELETE_LIST = 'deleteList';
+/**
+ * The deleteObjects() request must contain 1,000 or less objects, else it will fail with the following error
+ * message:
+ *
+ * The XML you provided was not well-formed or did not validate against our published schema
+ */
+const MAX_COUNT_PER_DELETE_REQUEST = 1000;
 
-const agent = new https.Agent({
-    keepAlive: true,
-    maxSockets: 100
-});
+const s3 = new S3Client({});
+const lambdaClient = new Lambda({});
 
 /**
- * Create a new S3 client.
- * @returns {AWS.S3} a new S3 client
+ * Entry point for the Lambda.
+ * @param {Event}  event the lambda event
+ * @param {Context} context the lambda context
  */
-function getS3Client() {
-    return new AWS.S3({
-        httpOptions: {
-            agent
-        }
-    });
-}
-
-// Formatter adds space after "async"
-// eslint-disable-next-line space-before-function-paren
-exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ context) => {
+export async function handler(event, context) {
     if (event.action === ACTION_CREATE) {
         await handleCreate(/** @type {CreateEvent} */(event), context);
     } else if (event.action === ACTION_DELETE_ALL) {
         await handleDelete(/** @type {DeleteAllEvent} */(event), context);
+    } else if (event.action === ACTION_DELETE_LIST) {
+        await handleDeleteList(/** @type {DeleteListEvent} */(event), context);
     } else {
         throw Error(`Unknown action '${event.action}'`);
     }
-};
+}
 
 /**
  * Executes the given function at must three times with 10s delay.
@@ -72,7 +74,6 @@ async function doWithRetry(operation, func) {
  * @param {Context} context the lambda context
  */
 async function handleCreate(event, context) {
-    const s3 = getS3Client();
     /** @type {Promise<unknown>[]} */
     const promises = [];
     const numberOfFiles = event.numberOfFiles;
@@ -80,12 +81,8 @@ async function handleCreate(event, context) {
     for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
         const key = event.prefix + fileId + '.json';
-        const params = {
-            Bucket: event.bucket,
-            Key: key,
-            Body: generateJsonContent(fileId)
-        };
-        promises.push(doWithRetry(`Upload file #${fileId}`, () => s3.upload(params).promise()));
+        const content = generateJsonContent(fileId);
+        promises.push(uploadFile(event.bucket, key, content));
         await delay(10);
     }
     console.log('Waiting for creating to finish...');
@@ -98,12 +95,20 @@ async function handleCreate(event, context) {
 }
 
 /**
- * The deleteObjects() request must contain 1,000 or less objects, else it will fail with the following error
- * message:
- *
- * The XML you provided was not well-formed or did not validate against our published schema
+ * Upload an object to S3.
+ * @param {string} bucket  the bucket name
+ * @param {string} key the object name
+ * @param {string} content the object content
+ * @returns {Promise<unknown>} the upload result
  */
-const MAX_COUNT_PER_DELETE_REQUEST = 1000;
+async function uploadFile(bucket, key, content) {
+    const command = new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: content
+    });
+    return doWithRetry(`Upload file #${key}`, () => s3.send(command));
+}
 
 /**
  * Delete all objects in the given bucket.
@@ -111,44 +116,121 @@ const MAX_COUNT_PER_DELETE_REQUEST = 1000;
  * @param {Context} context the lambda context
  */
 async function handleDelete(event, context) {
-    const s3 = getS3Client();
-    /** @type {Promise<unknown>[]} */
-    const promises = [];
-    let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket, MaxKeys: MAX_COUNT_PER_DELETE_REQUEST }).promise();
-    let totalObjectCount = 0;
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        totalObjectCount += objectsPage.Contents.length;
-        if (objectsPage.Contents.length > 0) {
-            console.log(`Deleting ${objectsPage.Contents.length} objects from bucket '${event.bucket}'`);
-            const objectIds = objectsPage.Contents.map((object) => { return { Key: object.Key }; });
-            const param = { Bucket: event.bucket, Delete: { Objects: objectIds } };
-            const promise = doWithRetry(`Delete ${objectsPage.Contents.length} files`, () => s3.deleteObjects(param).promise());
-            promises.push(promise);
-            await delay(5);
-        } else {
-            console.log('No more objects to delete, no need to call lambda');
-        }
-        if (objectsPage.NextContinuationToken) {
-            objectsPage = await s3.listObjectsV2({
-                Bucket: event.bucket,
-                ContinuationToken: objectsPage.NextContinuationToken
-            }).promise();
-        } else {
-            break;
-        }
-    }
-    if (promises.length === 0) {
+    const allObjects = await fetchObjects(event.bucket);
+    if (allObjects.length === 0) {
         console.log(`No objects to delete from bucket ${event.bucket}`);
         return;
     }
-    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalObjectCount} objects...`);
+    console.log(`Found ${allObjects.length} objects in ${event.bucket}`);
+    const chunks = splitIntoChunks(allObjects, Math.min(1, allObjects.length / 20000));
+    /** @type {Promise<unknown>[]} */
+    const promises = [];
+    for (const chunk of chunks) {
+        if (chunk.length > 0) {
+            promises.push(invokeDeleteLambda(context, event.bucket, chunk));
+            await delay(5);
+        } else {
+            console.log('Chunk is empty, nothing to delete');
+        }
+    }
+    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${allObjects.length} objects...`);
     try {
         await Promise.all(promises);
-        console.log(`Deleted ${totalObjectCount} objects`);
+        console.log(`Deleted ${allObjects.length} objects`);
     } catch (error) {
         context.fail('failed start delete-files lambda: ' + error);
+        throw error;
+    }
+}
+
+/**
+ * Invoke the lambda to delete the given S3 objects.
+ * @param {Context} context the lambda context
+ * @param {string} bucket the S3 bucket
+ * @param {string[]} objects the objects to delete
+ * @returns {Promise<unknown>} the invocation result
+ */
+async function invokeDeleteLambda(context, bucket, objects) {
+    /** @typedef {DeleteListEvent} */
+    const callParams = {
+        action: ACTION_DELETE_LIST,
+        bucket,
+        objects
+    };
+    console.log(`Calling lambda to delete ${objects.length} objects`);
+    const command = new InvokeCommand({
+        FunctionName: context.functionName,
+        Payload: new TextEncoder().encode(JSON.stringify(callParams)),
+        LogType: LogType.Tail
+    });
+    return lambdaClient.send(command);
+}
+
+/**
+ * Split the given array into chunks.
+ * @param {string[]} array the array to split
+ * @param {number} chunkSize the chunk size
+ * @returns {string[][]} the chunks
+ */
+function splitIntoChunks(array, chunkSize) {
+    const result = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+        const chunk = array.slice(i, i + chunkSize);
+        result.push(chunk);
+    }
+    return result;
+}
+
+/**
+ * Fetch all S3 objects from a bucket.
+ * @param {string} bucket the S3 bucket
+ * @returns {Promise<string[]>} the keys of all objects
+ */
+async function fetchObjects(bucket) {
+    /** @typedef {string[]} */
+    const objects = [];
+    /**
+     * Fetch S3 objects using the given pagination token.
+     * @param {string} bucket the S3 bucket
+     * @param {string} continuationToken the pagination token
+     * @returns {Promise<string[]>} the keys of all objects
+     */
+    async function fetchObjectsWithPagination(bucket, continuationToken) {
+        const result = await s3.send(
+            new ListObjectsV2Command({
+                Bucket: bucket,
+                ContinuationToken: continuationToken
+            })
+        );
+        objects.push(...(result.Contents || []).map(object => object.Key));
+        if (result.NextContinuationToken) {
+            return fetchObjectsWithPagination(bucket, result.NextContinuationToken);
+        }
+    }
+    await fetchObjectsWithPagination(bucket, undefined);
+    return objects;
+}
+
+/**
+ * Delete a list of keys from an S3 bucket.
+ * @param {DeleteListEvent} event the event
+ * @param {Context} context the lambda context
+ */
+async function handleDeleteList(event, context) {
+    /** @type {Promise<unknown>[]} */
+    const promises = [];
+    const chunks = splitIntoChunks(event.objects, MAX_COUNT_PER_DELETE_REQUEST);
+    console.log(`Deleting ${event.objects.length} objects in ${chunks.length}...`);
+    for (const chunk of chunks) {
+        const objectIdentifiers = chunk.map(key => { return { Key: key }; });
+        const command = new DeleteObjectsCommand({ Bucket: event.bucket, Delete: { Objects: objectIdentifiers } });
+        promises.push(doWithRetry(`Delete ${chunk.length} files`, () => s3.send(command)));
+        await delay(5);
+    }
+    try {
+        await Promise.all(promises);
+    } catch (error) {
+        context.fail('failed to delete objects: ' + error);
         throw error;
     }
 }

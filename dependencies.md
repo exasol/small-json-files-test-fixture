@@ -64,9 +64,10 @@
 
 ### Compile Dependencies
 
-| Dependency    | License          |
-| ------------- | ---------------- |
-| [aws-sdk][52] | [Apache-2.0][53] |
+| Dependency                   | License          |
+| ---------------------------- | ---------------- |
+| [@aws-sdk/client-lambda][52] | [Apache-2.0][53] |
+| [@aws-sdk/client-s3][54]     | [Apache-2.0][53] |
 
 [0]: https://aws.amazon.com/sdkforjava
 [1]: https://aws.amazon.com/apache2.0
@@ -120,5 +121,6 @@
 [49]: http://maven.apache.org/plugins/maven-jar-plugin/
 [50]: http://maven.apache.org/plugins/maven-install-plugin/
 [51]: http://maven.apache.org/plugins/maven-site-plugin/
-[52]: https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.1370.0.tgz
-[53]: https://github.com/aws/aws-sdk-js
+[52]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.326.0.tgz
+[53]: https://github.com/aws/aws-sdk-js-v3
+[54]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.326.0.tgz

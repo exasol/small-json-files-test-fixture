@@ -58,12 +58,15 @@ Please note that this is a breaking change as the API changes. See the [readme](
 
 #### Compile Dependency Updates
 
-* Updated `aws-sdk:^2.1342.0` to `^2.1370.0`
+* Added `@aws-sdk/client-lambda:^3.326.0`
+* Added `@aws-sdk/client-s3:^3.326.0`
+* Removed `aws-sdk:^2.1342.0`
 
 #### Development Dependency Updates
 
 * Updated `eslint:^8.36.0` to `^8.39.0`
 * Added `eslint-plugin-n:^15.7.0`
+* Updated `@types/node:^16.11.7` to `^18.16.3`
 * Added `eslint-plugin-promise:^6.1.1`
 * Added `eslint-plugin-import:^2.27.5`
 * Added `eslint-config-standard:^17.0.0`

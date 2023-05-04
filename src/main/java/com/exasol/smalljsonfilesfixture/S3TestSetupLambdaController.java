@@ -4,6 +4,7 @@ import static java.util.logging.Level.INFO;
 import static java.util.stream.Collectors.toList;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -40,7 +41,6 @@ class S3TestSetupLambdaController implements AutoCloseable {
     private static final String ACTION_CREATE = "create";
     private static final String ACTION_DELETE = "delete";
     private static final String FILE_PREFIX = "test-data-";
-    private static final String CREATE_JSON_FILES_LAMBDA = "createJsonFilesLambda/createJsonFilesLambda.js";
 
     private final String lambdaFunctionName;
     private final String roleName;
@@ -82,9 +82,8 @@ class S3TestSetupLambdaController implements AutoCloseable {
         try {
             controller.deployFunction();
         } catch (final RuntimeException exception) {
-            LOGGER.severe(() -> "Deployment failed: " + exception);
             controller.close();
-            throw exception;
+            throw new IllegalStateException("Failed to deploy lambda", exception);
         }
         return controller;
     }
@@ -138,7 +137,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
                     builder -> builder.functionName(this.lambdaFunctionName).architectures(Architecture.ARM64) //
                             .code(codeBuilder -> codeBuilder.zipFile(zipBytes)) //
                             .role(role.arn()) //
-                            .runtime(Runtime.NODEJS16_X) //
+                            .runtime(Runtime.NODEJS18_X) //
                             .handler("createJsonFilesLambda.handler") //
                             .timeout(15 * 60) //
                             .tags(this.tags));
@@ -219,14 +218,26 @@ class S3TestSetupLambdaController implements AutoCloseable {
         }
     }
 
+    private byte[] readResource(final String resourceName) {
+        final URL resource = getClass().getClassLoader().getResource(resourceName);
+        if (resource == null) {
+            throw new IllegalStateException("Resource '" + resourceName + "' not found");
+        }
+        try (InputStream stream = resource.openStream()) {
+            return stream.readAllBytes();
+        } catch (final IOException exception) {
+            throw new UncheckedIOException("Failed to read resource '" + resourceName + "'", exception);
+        }
+    }
+
     private SdkBytes getZippedCreateFilesLambda() {
         try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            try (final InputStream lambdaStream = Objects
-                    .requireNonNull(getClass().getClassLoader().getResourceAsStream(CREATE_JSON_FILES_LAMBDA));
-                    final ZipOutputStream zip = new ZipOutputStream(byteArrayOutputStream)) {
-                final ZipEntry entry = new ZipEntry("createJsonFilesLambda.js");
-                zip.putNextEntry(entry);
-                lambdaStream.transferTo(zip);
+            try (final ZipOutputStream zip = new ZipOutputStream(byteArrayOutputStream)) {
+                zip.putNextEntry(new ZipEntry("createJsonFilesLambda.js"));
+                zip.write(readResource("createJsonFilesLambda/createJsonFilesLambda.js"));
+                zip.closeEntry();
+                zip.putNextEntry(new ZipEntry("package.json"));
+                zip.write(readResource("createJsonFilesLambda/package.json"));
                 zip.closeEntry();
             }
             return SdkBytes.fromByteArray(byteArrayOutputStream.toByteArray());
