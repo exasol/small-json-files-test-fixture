@@ -64,8 +64,8 @@ class SmallJsonFilesTestSetupIT {
     }
 
     private void createSetup(final int fileCount, final int filesPerLambda) throws IOException {
-        new SmallJsonFilesTestSetup().setup(TEST_CONFIG.getTags(), bucketName, TEST_CONFIG.getAwsCredentialsProvider(),
-                fileCount, filesPerLambda);
+        new SmallJsonFilesTestSetup(TEST_CONFIG.getAwsCredentialsProvider(), TEST_CONFIG.getTags(), bucketName)
+                .setup(fileCount, filesPerLambda);
     }
 
     @Test

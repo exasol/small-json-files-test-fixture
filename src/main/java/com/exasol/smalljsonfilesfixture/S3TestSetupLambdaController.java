@@ -64,22 +64,25 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     /**
      * Create a new instance of {@link S3TestSetupLambdaController}.
+     * <p>
+     * Please note that the caller is responsible for {@link #close() closing} this controller.
      *
      * @param tags                tags for the AWS resources
      * @param bucket              S3 Bucket
      * @param credentialsProvider AWS credentials provider
      * @return created {@link S3TestSetupLambdaController}
-     * @throws IOException if something goes wrong
      */
     public static S3TestSetupLambdaController create(final Map<String, String> tags, final String bucket,
-            final AwsCredentialsProvider credentialsProvider) throws IOException {
+            final AwsCredentialsProvider credentialsProvider) {
         final String accountId = StsClient.builder().credentialsProvider(credentialsProvider).region(AWS_REGION).build()
                 .getCallerIdentity().account();
+        @SuppressWarnings("java:S2095") // The caller is responsible for closing the controller.
         final S3TestSetupLambdaController controller = new S3TestSetupLambdaController(accountId, bucket,
                 credentialsProvider, tags);
         try {
             controller.deployFunction();
-        } catch (final IOException exception) {
+        } catch (final RuntimeException exception) {
+            LOGGER.severe(() -> "Deployment failed: " + exception);
             controller.close();
             throw exception;
         }
@@ -127,7 +130,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
                 .credentialsProvider(this.credentialsProvider).build();
     }
 
-    private void deployFunction() throws IOException {
+    private void deployFunction() {
         final Role role = createRoleForLambda();
         final SdkBytes zipBytes = getZippedCreateFilesLambda();
         try (final LambdaClient lambdaClient = createLambdaClient()) {
@@ -143,6 +146,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
         }
         this.createdResources.add(() -> {
             try (final LambdaClient lambdaClient = createLambdaClient()) {
+                LOGGER.fine(() -> "Deleting lambda " + this.lambdaFunctionName);
                 lambdaClient.deleteFunction(request -> request.functionName(this.lambdaFunctionName));
             }
         });
@@ -215,7 +219,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
         }
     }
 
-    private SdkBytes getZippedCreateFilesLambda() throws IOException {
+    private SdkBytes getZippedCreateFilesLambda() {
         try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             try (final InputStream lambdaStream = Objects
                     .requireNonNull(getClass().getClassLoader().getResourceAsStream(CREATE_JSON_FILES_LAMBDA));
@@ -226,6 +230,8 @@ class S3TestSetupLambdaController implements AutoCloseable {
                 zip.closeEntry();
             }
             return SdkBytes.fromByteArray(byteArrayOutputStream.toByteArray());
+        } catch (final IOException exception) {
+            throw new UncheckedIOException("Failed to create zipped lambda package", exception);
         }
     }
 
@@ -330,10 +336,15 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         Collections.reverse(this.createdResources);
-        for (final Closeable resource : this.createdResources) {
-            resource.close();
+        LOGGER.fine(() -> "Closing/deleting " + this.createdResources.size() + " resources...");
+        try {
+            for (final Closeable resource : this.createdResources) {
+                resource.close();
+            }
+        } catch (final IOException exception) {
+            throw new UncheckedIOException("Failed to delete resources. Please delete them manually.", exception);
         }
     }
 }

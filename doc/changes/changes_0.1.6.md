@@ -1,12 +1,20 @@
-# Small Json Files Test Fixture 0.1.6, released 2023-??-??
+# Small Json Files Test Fixture 0.1.6, released 2023-05-04
 
-Code name:
+Code name: Fix read timeout on GitHub Actions
 
 ## Summary
+
+Setup was failing with a read timeout error on GitHub Actions when using 20,000 files per lambda. We didn't find a solution for the root cause but implemented a workaround. Now you can only specify the total number of files to create while the number of files per lambda is hard coded to 5,000.
+
+Please note that this is a breaking change as the API changes. See the [readme](https://github.com/exasol/small-json-files-test-fixture/#usage) for example usage.
 
 ## Refactoring
 
 * #22: Migrated CI isolation to AWS CDK v2
+
+## Bugfixes
+
+* #24: Fixed read timeout when running on GitHub Actions
 
 ## Dependency Updates
 
@@ -16,11 +24,11 @@ Code name:
 
 * Removed `commons-codec:commons-codec:1.15`
 * Updated `org.mockito:mockito-core:5.2.0` to `5.3.1`
-* Updated `software.amazon.awssdk:iam:2.20.31` to `2.20.58`
-* Updated `software.amazon.awssdk:lambda:2.20.31` to `2.20.58`
-* Updated `software.amazon.awssdk:netty-nio-client:2.20.31` to `2.20.58`
-* Updated `software.amazon.awssdk:s3:2.20.31` to `2.20.58`
-* Updated `software.amazon.awssdk:sts:2.20.31` to `2.20.58`
+* Updated `software.amazon.awssdk:iam:2.20.31` to `2.20.59`
+* Updated `software.amazon.awssdk:lambda:2.20.31` to `2.20.59`
+* Updated `software.amazon.awssdk:netty-nio-client:2.20.31` to `2.20.59`
+* Updated `software.amazon.awssdk:s3:2.20.31` to `2.20.59`
+* Updated `software.amazon.awssdk:sts:2.20.31` to `2.20.59`
 
 #### Runtime Dependency Updates
 

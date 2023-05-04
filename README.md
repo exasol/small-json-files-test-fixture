@@ -33,19 +33,15 @@ The setup consists of JSON files like:
 ## Usage
 
 ```java
-new SmallJsonFilesTestSetup().setup(
+new SmallJsonFilesTestSetup(awsCredentialsProvider,
         Map.of("exa:project", "MYPROJ", "exa:owner", "me@example.com"),
-        "myBucket",
-        awsCredentialsProvider,
-        1_000_000 /* total number of files */,
-        5_000 /* files per lambda function */);
+        "myBucket"
+    ).setup(1_000_000 /* total number of files */);
 ```
 
 This will create the files in the bucket if it's not already there. It will **not** delete the setup. The idea is that you keep the files in your account.
 
 Currently only region `eu-central-1` is supported.
-
-Please note that generating more than 5,000 files per lambda may fail with a `io.netty.handler.timeout.ReadTimeoutException` when running with GitHub Actions. Make sure to use 5,000 or less files per lambda.
 
 ## Costs
 
