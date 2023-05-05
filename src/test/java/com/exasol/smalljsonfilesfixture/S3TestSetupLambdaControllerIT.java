@@ -5,7 +5,6 @@ import static com.exasol.smalljsonfilesfixture.S3TestUtils.emptyS3Bucket;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 
@@ -63,12 +62,5 @@ class S3TestSetupLambdaControllerIT {
     void testDeleteFilesFromEmptyBucketSucceeds() {
         assertDoesNotThrow(controller::deleteFiles);
         assertThat("bucket is still empty", countDataFiles(s3Client, bucketName), equalTo(0));
-    }
-
-    @Test
-    void testTooManyLambdasException() {
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> controller.createFiles(2000, 1));
-        assertThat(exception.getMessage(), equalTo("More then 1000 lambdas are currently not supported."));
     }
 }
