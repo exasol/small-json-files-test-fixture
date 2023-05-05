@@ -73,7 +73,7 @@
 [1]: https://aws.amazon.com/apache2.0
 [2]: https://github.com/exasol/error-reporting-java/
 [3]: https://github.com/exasol/error-reporting-java/blob/main/LICENSE
-[4]: https://aws.amazon.com/sdkforjava/http-clients/apache-client
+[4]: https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/apache/ApacheHttpClient.html
 [5]: https://github.com/eclipse-ee4j/jsonp
 [6]: https://projects.eclipse.org/license/epl-2.0
 [7]: https://projects.eclipse.org/license/secondary-gpl-2.0-cp
