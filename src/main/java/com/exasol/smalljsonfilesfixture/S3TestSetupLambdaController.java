@@ -289,13 +289,16 @@ class S3TestSetupLambdaController implements AutoCloseable {
                 .allOf(lambdaFutures.toArray(CompletableFuture[]::new));
         try {
             combinedFuture.get();
-            final List<String> errorMessages = lambdaFutures.stream().map(this::getFuture) //
-                    .map(InvokeResponse::functionError) //
-                    .filter(Objects::nonNull) //
+            final List<InvokeResponse> errorMessages = lambdaFutures.stream().map(this::getFuture) //
+                    .filter(response -> response.functionError() != null) //
                     .collect(toList());
             if (!errorMessages.isEmpty()) {
+                for (final InvokeResponse response : errorMessages) {
+                    LOGGER.warning(() -> "Lambda failed with error '" + response.functionError() + "', log: "
+                            + getLogMessages(response));
+                }
                 throw new IllegalStateException(
-                        "Execution of " + errorMessages.size() + " lambdas failed: " + errorMessages);
+                        "Execution of " + errorMessages.size() + " lambdas failed. See log for details.");
             } else {
                 LOGGER.info(() -> "All " + lambdaFutures.size() + " lambdas finished successfully");
             }
@@ -304,6 +307,14 @@ class S3TestSetupLambdaController implements AutoCloseable {
             throw new IllegalStateException("Interrupted while running lambda functions.", exception);
         } catch (final ExecutionException exception) {
             throw new IllegalStateException("One or more lambda functions failed.", exception);
+        }
+    }
+
+    private String getLogMessages(final InvokeResponse response) {
+        if (response.logResult() != null) {
+            return new String(Base64.getDecoder().decode(response.logResult()), StandardCharsets.UTF_8);
+        } else {
+            return "(no log)";
         }
     }
 

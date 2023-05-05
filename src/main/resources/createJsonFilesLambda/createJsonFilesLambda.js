@@ -57,7 +57,7 @@ async function doWithRetry(operation, func) {
             await func();
             break;
         } catch (error) {
-            console.log(`Operation ${operation} failed after ${retryCounter} retries: ${error}`);
+            console.log(`Operation '${operation}' failed after ${retryCounter} retries: ${error}`);
             if (retryCounter < 3) {
                 await delay(10000);
                 retryCounter++;
@@ -71,6 +71,7 @@ async function doWithRetry(operation, func) {
 /**
  * @param {CreateEvent} event the event
  * @param {Context} context the lambda context
+ * @returns {Promise<string>} result message
  */
 async function handleCreate(event, context) {
     /** @type {Promise<unknown>[]} */
@@ -87,10 +88,13 @@ async function handleCreate(event, context) {
     console.log('Waiting for creating to finish...');
     try {
         await Promise.all(promises);
+        const result = `Creating ${numberOfFiles} files finished.`;
+        console.log(result);
+        return result;
     } catch (error) {
-        context.fail('failed to create s3 file: ' + error);
+        console.error(`Failed to create s3 files: ${error}`);
+        throw error;
     }
-    console.log('Creating finished.');
 }
 
 /**
@@ -106,13 +110,14 @@ async function uploadFile(bucket, key, content) {
         Key: key,
         Body: content
     });
-    return doWithRetry(`Upload file #${key}`, () => s3.send(command));
+    return doWithRetry(`Upload file ${key}`, () => s3.send(command));
 }
 
 /**
  * Delete all files in the given bucket.
  * @param {DeleteAllEvent} event the event
  * @param {Context} context the lambda context
+ * @returns {Promise<string>} result message
  */
 async function handleDelete(event, context) {
     let continuationToken;
@@ -127,20 +132,24 @@ async function handleDelete(event, context) {
         continuationToken = result.continuationToken;
         filesToDelete.push(...result.files);
         totalFileCount += filesToDelete.length;
-        if (filesToDelete.length >= 20000) {
+        if (filesToDelete.length >= 50000) {
+            console.log(`Calling lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
             promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
             filesToDelete = [];
         }
     } while (continuationToken);
     if (filesToDelete.length > 0) {
+        console.log(`Calling lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
         promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
     }
     console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalFileCount} files...`);
     try {
         await Promise.all(promises);
-        console.log(`Deleted ${totalFileCount} files`);
+        const result = `Deleted ${totalFileCount} files`;
+        console.log(result);
+        return result;
     } catch (error) {
-        context.fail('failed start delete-files lambda: ' + error);
+        console.error(`Failed to delete lambdas: ${error}`);
         throw error;
     }
 }
@@ -159,7 +168,6 @@ async function invokeDeleteLambda(context, bucket, files) {
         bucket,
         files
     };
-    console.log(`Calling lambda to delete ${files.length} files`);
     const command = new InvokeCommand({
         FunctionName: context.functionName,
         Payload: new TextEncoder().encode(JSON.stringify(callParams)),
@@ -204,6 +212,7 @@ async function listFiles(bucket, continuationToken) {
  * Delete a list of keys from an S3 bucket.
  * @param {DeleteListEvent} event the event
  * @param {Context} context the lambda context
+ * @returns {Promise<string>} result message
  */
 async function handleDeleteList(event, context) {
     /** @type {Promise<unknown>[]} */
@@ -218,6 +227,9 @@ async function handleDeleteList(event, context) {
     }
     try {
         await Promise.all(promises);
+        const status = `Deleted ${event.files.length} files in ${chunks.length} chunks`;
+        console.log(status);
+        return status;
     } catch (error) {
         context.fail('failed to delete files: ' + error);
         throw error;

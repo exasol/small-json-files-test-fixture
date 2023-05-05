@@ -52,8 +52,16 @@ class SmallJsonFilesTestSetupIT {
     }
 
     @Test
-    void testManyFilesPerLambda() throws IOException {
+    void test5kFilesPerLambda() throws IOException {
         final int count = 5_000;
+        final int countPerLambda = count;
+        createSetup(count, countPerLambda);
+        assertThat(countDataFiles(s3Client, bucketName), equalTo(count));
+    }
+
+    @Test
+    void test20kFilesPerLambda() throws IOException {
+        final int count = 20_000;
         final int countPerLambda = count;
         createSetup(count, countPerLambda);
         assertThat(countDataFiles(s3Client, bucketName), equalTo(count));
