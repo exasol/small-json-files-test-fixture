@@ -5,17 +5,17 @@
 
 ### Compile Dependencies
 
-| Dependency                                                  | License                                                                                                      |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [AWS Java SDK :: Services :: Amazon S3][0]                  | [Apache License, Version 2.0][1]                                                                             |
-| [error-reporting-java][2]                                   | [MIT License][3]                                                                                             |
-| [AWS Java SDK :: Services :: AWS Lambda][0]                 | [Apache License, Version 2.0][1]                                                                             |
-| [AWS Java SDK :: Services :: AWS IAM][0]                    | [Apache License, Version 2.0][1]                                                                             |
-| [AWS Java SDK :: Services :: AWS STS][0]                    | [Apache License, Version 2.0][1]                                                                             |
-| [AWS Java SDK :: HTTP Clients :: Netty Non-Blocking I/O][4] | [Apache License, Version 2.0][1]                                                                             |
-| [Jakarta JSON Processing API][5]                            | [Eclipse Public License 2.0][6]; [GNU General Public License, version 2 with the GNU Classpath Exception][7] |
-| [JSON-B API][8]                                             | [Eclipse Public License 2.0][6]; [GNU General Public License, version 2 with the GNU Classpath Exception][7] |
-| [mockito-core][9]                                           | [The MIT License][10]                                                                                        |
+| Dependency                                  | License                                                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [AWS Java SDK :: Services :: Amazon S3][0]  | [Apache License, Version 2.0][1]                                                                             |
+| [error-reporting-java][2]                   | [MIT License][3]                                                                                             |
+| [AWS Java SDK :: Services :: AWS Lambda][0] | [Apache License, Version 2.0][1]                                                                             |
+| [AWS Java SDK :: Services :: AWS IAM][0]    | [Apache License, Version 2.0][1]                                                                             |
+| [AWS Java SDK :: Services :: AWS STS][0]    | [Apache License, Version 2.0][1]                                                                             |
+| [AWS Java SDK :: HTTP Clients :: Apache][4] | [Apache License, Version 2.0][1]                                                                             |
+| [Jakarta JSON Processing API][5]            | [Eclipse Public License 2.0][6]; [GNU General Public License, version 2 with the GNU Classpath Exception][7] |
+| [JSON-B API][8]                             | [Eclipse Public License 2.0][6]; [GNU General Public License, version 2 with the GNU Classpath Exception][7] |
+| [mockito-core][9]                           | [The MIT License][10]                                                                                        |
 
 ### Test Dependencies
 
@@ -73,7 +73,7 @@
 [1]: https://aws.amazon.com/apache2.0
 [2]: https://github.com/exasol/error-reporting-java/
 [3]: https://github.com/exasol/error-reporting-java/blob/main/LICENSE
-[4]: https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/nio/netty/NettyNioAsyncHttpClient.html
+[4]: https://aws.amazon.com/sdkforjava/http-clients/apache-client
 [5]: https://github.com/eclipse-ee4j/jsonp
 [6]: https://projects.eclipse.org/license/epl-2.0
 [7]: https://projects.eclipse.org/license/secondary-gpl-2.0-cp

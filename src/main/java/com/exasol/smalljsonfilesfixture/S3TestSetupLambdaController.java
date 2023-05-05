@@ -1,7 +1,6 @@
 package com.exasol.smalljsonfilesfixture;
 
 import static java.util.logging.Level.INFO;
-import static java.util.stream.Collectors.toList;
 
 import java.io.*;
 import java.net.URL;
@@ -9,24 +8,20 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.exasol.smalljsonfilesfixture.Packager.Package;
-
 import jakarta.json.*;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
-import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.Policy;
 import software.amazon.awssdk.services.iam.model.Role;
-import software.amazon.awssdk.services.lambda.LambdaAsyncClient;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.lambda.model.*;
 import software.amazon.awssdk.services.lambda.model.Runtime;
@@ -38,6 +33,8 @@ import software.amazon.awssdk.services.sts.StsClient;
 class S3TestSetupLambdaController implements AutoCloseable {
     static final Region AWS_REGION = Region.EU_CENTRAL_1;
     private static final Logger LOGGER = Logger.getLogger(S3TestSetupLambdaController.class.getName());
+    /** Using too many concurrent executions will cause S3 PUT requests to fail with a "SlowDown" error. */
+    private static final int CONCURRENT_LAMBDA_EXECUTIONS = 50;
     private static final String ACTION_CREATE = "create";
     private static final String ACTION_DELETE = "delete";
     private static final String FILE_PREFIX = "test-data-";
@@ -107,26 +104,14 @@ class S3TestSetupLambdaController implements AutoCloseable {
         final JsonObjectBuilder eventBuilder = Json.createObjectBuilder();
         eventBuilder.add("action", ACTION_DELETE);
         eventBuilder.add("bucket", this.bucket);
-        try (final var asyncLambdaClient = createAsyncLambdaClient()) {
-            final CompletableFuture<InvokeResponse> future = startLambda(eventBuilder.build(), asyncLambdaClient);
-            final InvokeResponse result = future.get();
+        try (final var lambdaClient = createLambdaClient()) {
+            final InvokeResponse result = startLambda(eventBuilder.build(), lambdaClient);
             if (result.functionError() != null) {
                 throw new IllegalStateException(
                         "Deleting files from bucket " + this.bucket + " failed:" + result.payload().asUtf8String());
             }
             LOGGER.info(() -> "Delete done in " + Duration.between(start, Instant.now()));
-        } catch (final InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while waiting for delete-files lambda to finish.", exception);
-        } catch (final ExecutionException | IllegalStateException exception) {
-            throw new IllegalStateException("The delete-files lambda function failed: " + exception.getMessage(),
-                    exception);
         }
-    }
-
-    private LambdaAsyncClient createAsyncLambdaClient() {
-        return LambdaAsyncClient.builder().httpClient(getHttpClientWithIncreasedTimeouts())
-                .credentialsProvider(this.credentialsProvider).build();
     }
 
     private void deployFunction() {
@@ -152,17 +137,16 @@ class S3TestSetupLambdaController implements AutoCloseable {
     }
 
     private LambdaClient createLambdaClient() {
-        return LambdaClient.builder().credentialsProvider(this.credentialsProvider).region(AWS_REGION).build();
+        return LambdaClient.builder().credentialsProvider(this.credentialsProvider).region(AWS_REGION)
+                .httpClient(getHttpClientWithIncreasedTimeouts()).build();
     }
 
-    private SdkAsyncHttpClient getHttpClientWithIncreasedTimeouts() {
-        final Duration timeout = Duration.ofMinutes(16);
-        return NettyNioAsyncHttpClient.builder() //
-                .readTimeout(Duration.ofMinutes(16)) //
+    private SdkHttpClient getHttpClientWithIncreasedTimeouts() {
+        final Duration timeout = Duration.ofMinutes(1);
+        return ApacheHttpClient.builder() //
+                .socketTimeout(Duration.ofMinutes(16)) //
                 .connectionAcquisitionTimeout(timeout) //
-                .writeTimeout(timeout) //
                 .connectionTimeout(timeout) //
-                .maxConcurrency(600) //
                 .build();
     }
 
@@ -248,28 +232,40 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     private void runLambdas(final int files, final int filesPerLambda) {
         final Packager packager = new Packager(files, filesPerLambda);
-        try (final var asyncLambdaClient = createAsyncLambdaClient()) {
+        final ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_LAMBDA_EXECUTIONS);
+        try (final var lambdaClient = createLambdaClient()) {
             final int lambdas = packager.getNumberOfPackages();
-            if (lambdas > 1000) {
-                throw new IllegalArgumentException("More then 1000 lambdas are currently not supported.");
-            }
-            LOGGER.log(INFO, "Creating {0} files using {1} lambda functions in bucket {2}...",
-                    new Object[] { files, lambdas, this.bucket });
+            LOGGER.log(INFO, "Creating {0} files using {1} lambda functions (max concurrency: {2}) in bucket {3}...",
+                    new Object[] { files, lambdas, CONCURRENT_LAMBDA_EXECUTIONS, this.bucket });
             final Instant start = Instant.now();
-            final List<CompletableFuture<InvokeResponse>> lambdaFutures = new ArrayList<>(lambdas);
-
-            for (final Package p : packager) {
-                final JsonObject event = createLambdaEvent(p.getSize(), p.getNumber());
-                final String lambdaDescription = "Lambda #" + p.getNumber() + " " + event.toString();
-                final CompletableFuture<InvokeResponse> future = startLambda(event, asyncLambdaClient);
-                future.exceptionally(exception -> {
-                    LOGGER.severe(lambdaDescription + " failed: " + exception.getMessage());
-                    throw new IllegalStateException("Failed to run lambda #" + p.getNumber(), exception);
-                });
-                lambdaFutures.add(future);
+            for (final Packager.Package pkg : packager) {
+                executor.execute(() -> startLambdaForPackage(lambdaClient, pkg));
             }
-            waitForLambdasToFinish(lambdaFutures);
+            LOGGER.info(() -> "Waiting for " + lambdas + " lambdas to complete...");
+            executor.shutdown();
+            try {
+                executor.awaitTermination(30, TimeUnit.MINUTES);
+            } catch (final InterruptedException exception) {
+                Thread.currentThread().interrupt();
+            }
             LOGGER.info(() -> "Create done in " + Duration.between(start, Instant.now()));
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    private void startLambdaForPackage(final LambdaClient lambdaClient, final Packager.Package pkg) {
+        final JsonObject event = createLambdaEvent(pkg.getSize(), pkg.getNumber());
+        final String lambdaDescription = "Lambda #" + pkg.getNumber() + " of " + pkg.getTotalCount();
+        try {
+            LOGGER.info(() -> "Starting " + lambdaDescription + "...");
+            final InvokeResponse result = startLambda(event, lambdaClient);
+            LOGGER.info(() -> lambdaDescription + " finished with result " + result.statusCode() + ": "
+                    + result.payload().asUtf8String());
+        } catch (final RuntimeException exception) {
+            final String message = lambdaDescription + " failed: " + exception.getMessage();
+            LOGGER.severe(message);
+            throw new IllegalStateException(message, exception);
         }
     }
 
@@ -283,67 +279,11 @@ class S3TestSetupLambdaController implements AutoCloseable {
         return eventBuilder.build();
     }
 
-    private void waitForLambdasToFinish(final List<CompletableFuture<InvokeResponse>> lambdaFutures) {
-        LOGGER.info(() -> "Waiting for " + lambdaFutures.size() + " lambdas to finish...");
-        final CompletableFuture<Void> combinedFuture = CompletableFuture
-                .allOf(lambdaFutures.toArray(CompletableFuture[]::new));
-        try {
-            combinedFuture.get();
-            final List<InvokeResponse> errorMessages = lambdaFutures.stream().map(this::getFuture) //
-                    .filter(response -> response.functionError() != null) //
-                    .collect(toList());
-            if (!errorMessages.isEmpty()) {
-                for (final InvokeResponse response : errorMessages) {
-                    LOGGER.warning(() -> "Lambda failed with error '" + response.functionError() + "', log: "
-                            + getLogMessages(response));
-                }
-                throw new IllegalStateException(
-                        "Execution of " + errorMessages.size() + " lambdas failed. See log for details.");
-            } else {
-                LOGGER.info(() -> "All " + lambdaFutures.size() + " lambdas finished successfully");
-            }
-        } catch (final InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while running lambda functions.", exception);
-        } catch (final ExecutionException exception) {
-            throw new IllegalStateException("One or more lambda functions failed.", exception);
-        }
-    }
-
-    private String getLogMessages(final InvokeResponse response) {
-        if (response.logResult() != null) {
-            return new String(Base64.getDecoder().decode(response.logResult()), StandardCharsets.UTF_8);
-        } else {
-            return "(no log)";
-        }
-    }
-
-    /**
-     * Get the result of a {@link CompletableFuture} by calling {@link CompletableFuture#get()} and handle the checked
-     * exceptions. Use this method in cases where no checked exceptions are allowed.
-     *
-     * @param <T>    type of the result
-     * @param future the future from which to get the result
-     * @return the result
-     * @throws IllegalStateException in case the future throws an {@link InterruptedException} or
-     *                               {@link ExecutionException}
-     */
-    private <T> T getFuture(final CompletableFuture<T> future) {
-        try {
-            return future.get();
-        } catch (final InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Failed to get result of future " + future, exception);
-        } catch (final ExecutionException exception) {
-            throw new IllegalStateException("Failed to get result of future " + future, exception);
-        }
-    }
-
-    private CompletableFuture<InvokeResponse> startLambda(final JsonObject event,
-            final LambdaAsyncClient asyncLambdaClient) {
+    private InvokeResponse startLambda(final JsonObject event, final LambdaClient lambdaClient) {
         final byte[] serializedEvent = serializeJson(event);
-        return asyncLambdaClient.invoke(request -> request.functionName(this.lambdaFunctionName) //
+        return lambdaClient.invoke(request -> request.functionName(this.lambdaFunctionName) //
                 .invocationType(InvocationType.REQUEST_RESPONSE) //
+                .logType(LogType.TAIL) //
                 .payload(SdkBytes.fromByteArray(serializedEvent)));
     }
 

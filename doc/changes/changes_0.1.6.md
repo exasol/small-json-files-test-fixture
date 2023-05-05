@@ -24,9 +24,10 @@ Please note that this is a breaking change as the API changes. See the [readme](
 
 * Removed `commons-codec:commons-codec:1.15`
 * Updated `org.mockito:mockito-core:5.2.0` to `5.3.1`
+* Added `software.amazon.awssdk:apache-client:2.20.59`
 * Updated `software.amazon.awssdk:iam:2.20.31` to `2.20.59`
 * Updated `software.amazon.awssdk:lambda:2.20.31` to `2.20.59`
-* Updated `software.amazon.awssdk:netty-nio-client:2.20.31` to `2.20.59`
+* Removed `software.amazon.awssdk:netty-nio-client:2.20.31`
 * Updated `software.amazon.awssdk:s3:2.20.31` to `2.20.59`
 * Updated `software.amazon.awssdk:sts:2.20.31` to `2.20.59`
 
