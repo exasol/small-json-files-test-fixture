@@ -7,18 +7,17 @@ import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client 
  * @typedef {{ action: string }} Event
  * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
  * @typedef {Event & { bucket: string }} DeleteAllEvent
- * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
- * @typedef {import('@aws-sdk/client-s3')._Object} S3Object
+ * @typedef {Event & { bucket: string, files: string[] }} DeleteListEvent
  */
 
 /** Action for creating JSON files */
 const ACTION_CREATE = 'create';
-/** Action for deleting all objects from a bucket */
+/** Action for deleting all files from a bucket */
 const ACTION_DELETE_ALL = 'delete';
-/** Action for deleting a list of objects from a bucket */
+/** Action for deleting a list of files from a bucket */
 const ACTION_DELETE_LIST = 'deleteList';
 /**
- * The deleteObjects() request must contain 1,000 or less objects, else it will fail with the following error
+ * The DeleteObjectsCommand request must contain 1,000 or less files, else it will fail with the following error
  * message:
  *
  * The XML you provided was not well-formed or did not validate against our published schema
@@ -89,16 +88,16 @@ async function handleCreate(event, context) {
     try {
         await Promise.all(promises);
     } catch (error) {
-        context.fail('failed to create s3 object: ' + error);
+        context.fail('failed to create s3 file: ' + error);
     }
     console.log('Creating finished.');
 }
 
 /**
- * Upload an object to S3.
+ * Upload a file to S3.
  * @param {string} bucket  the bucket name
- * @param {string} key the object name
- * @param {string} content the object content
+ * @param {string} key the file name
+ * @param {string} content the file content
  * @returns {Promise<unknown>} the upload result
  */
 async function uploadFile(bucket, key, content) {
@@ -111,32 +110,35 @@ async function uploadFile(bucket, key, content) {
 }
 
 /**
- * Delete all objects in the given bucket.
+ * Delete all files in the given bucket.
  * @param {DeleteAllEvent} event the event
  * @param {Context} context the lambda context
  */
 async function handleDelete(event, context) {
-    const allObjects = await fetchObjects(event.bucket);
-    if (allObjects.length === 0) {
-        console.log(`No objects to delete from bucket ${event.bucket}`);
-        return;
-    }
-    console.log(`Found ${allObjects.length} objects in ${event.bucket}`);
-    const chunks = splitIntoChunks(allObjects, Math.min(1, allObjects.length / 20000));
+    let continuationToken;
+    /** @type {string[]} */
+    let filesToDelete = [];
     /** @type {Promise<unknown>[]} */
     const promises = [];
-    for (const chunk of chunks) {
-        if (chunk.length > 0) {
-            promises.push(invokeDeleteLambda(context, event.bucket, chunk));
-            await delay(5);
-        } else {
-            console.log('Chunk is empty, nothing to delete');
+    let totalFileCount = 0;
+    console.log(`Listing files in bucket ${event.bucket}...`);
+    do {
+        const result = await listFiles(event.bucket, continuationToken);
+        continuationToken = result.continuationToken;
+        filesToDelete.push(...result.files);
+        totalFileCount += filesToDelete.length;
+        if (filesToDelete.length >= 20000) {
+            promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
+            filesToDelete = [];
         }
+    } while (continuationToken);
+    if (filesToDelete.length > 0) {
+        promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
     }
-    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${allObjects.length} objects...`);
+    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalFileCount} files...`);
     try {
         await Promise.all(promises);
-        console.log(`Deleted ${allObjects.length} objects`);
+        console.log(`Deleted ${totalFileCount} files`);
     } catch (error) {
         context.fail('failed start delete-files lambda: ' + error);
         throw error;
@@ -144,20 +146,20 @@ async function handleDelete(event, context) {
 }
 
 /**
- * Invoke the lambda to delete the given S3 objects.
+ * Invoke the lambda to delete the given S3 files.
  * @param {Context} context the lambda context
  * @param {string} bucket the S3 bucket
- * @param {string[]} objects the objects to delete
+ * @param {string[]} files the files to delete
  * @returns {Promise<unknown>} the invocation result
  */
-async function invokeDeleteLambda(context, bucket, objects) {
+async function invokeDeleteLambda(context, bucket, files) {
     /** @typedef {DeleteListEvent} */
     const callParams = {
         action: ACTION_DELETE_LIST,
         bucket,
-        objects
+        files
     };
-    console.log(`Calling lambda to delete ${objects.length} objects`);
+    console.log(`Calling lambda to delete ${files.length} files`);
     const command = new InvokeCommand({
         FunctionName: context.functionName,
         Payload: new TextEncoder().encode(JSON.stringify(callParams)),
@@ -182,33 +184,20 @@ function splitIntoChunks(array, chunkSize) {
 }
 
 /**
- * Fetch all S3 objects from a bucket.
+ * List S3 files using the given pagination token.
  * @param {string} bucket the S3 bucket
- * @returns {Promise<string[]>} the keys of all objects
+ * @param {string} continuationToken the pagination token
+ * @returns {Promise<{files:string[], continuationToken?:string}>} the keys of all files
  */
-async function fetchObjects(bucket) {
-    /** @typedef {string[]} */
-    const objects = [];
-    /**
-     * Fetch S3 objects using the given pagination token.
-     * @param {string} bucket the S3 bucket
-     * @param {string} continuationToken the pagination token
-     * @returns {Promise<string[]>} the keys of all objects
-     */
-    async function fetchObjectsWithPagination(bucket, continuationToken) {
-        const result = await s3.send(
-            new ListObjectsV2Command({
-                Bucket: bucket,
-                ContinuationToken: continuationToken
-            })
-        );
-        objects.push(...(result.Contents || []).map(object => object.Key));
-        if (result.NextContinuationToken) {
-            return fetchObjectsWithPagination(bucket, result.NextContinuationToken);
-        }
-    }
-    await fetchObjectsWithPagination(bucket, undefined);
-    return objects;
+async function listFiles(bucket, continuationToken) {
+    const result = await s3.send(
+        new ListObjectsV2Command({
+            Bucket: bucket,
+            ContinuationToken: continuationToken
+        })
+    );
+    const files = (result.Contents || []).map(file => file.Key);
+    return { files, continuationToken: result.NextContinuationToken };
 }
 
 /**
@@ -219,18 +208,18 @@ async function fetchObjects(bucket) {
 async function handleDeleteList(event, context) {
     /** @type {Promise<unknown>[]} */
     const promises = [];
-    const chunks = splitIntoChunks(event.objects, MAX_COUNT_PER_DELETE_REQUEST);
-    console.log(`Deleting ${event.objects.length} objects in ${chunks.length}...`);
+    const chunks = splitIntoChunks(event.files, MAX_COUNT_PER_DELETE_REQUEST);
+    console.log(`Deleting ${event.files.length} files in ${chunks.length} chunks...`);
     for (const chunk of chunks) {
-        const objectIdentifiers = chunk.map(key => { return { Key: key }; });
-        const command = new DeleteObjectsCommand({ Bucket: event.bucket, Delete: { Objects: objectIdentifiers } });
+        const identifiers = chunk.map(key => { return { Key: key }; });
+        const command = new DeleteObjectsCommand({ Bucket: event.bucket, Delete: { Objects: identifiers } });
         promises.push(doWithRetry(`Delete ${chunk.length} files`, () => s3.send(command)));
         await delay(5);
     }
     try {
         await Promise.all(promises);
     } catch (error) {
-        context.fail('failed to delete objects: ' + error);
+        context.fail('failed to delete files: ' + error);
         throw error;
     }
 }
