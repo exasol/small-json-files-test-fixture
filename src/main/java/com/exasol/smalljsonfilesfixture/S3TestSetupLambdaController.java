@@ -34,7 +34,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
     static final Region AWS_REGION = Region.EU_CENTRAL_1;
     private static final Logger LOGGER = Logger.getLogger(S3TestSetupLambdaController.class.getName());
     /** Using too many concurrent executions will cause S3 PUT requests to fail with a "SlowDown" error. */
-    private static final int CONCURRENT_LAMBDA_EXECUTIONS = 50;
+    private static final int CONCURRENT_LAMBDA_EXECUTIONS = 150;
     private static final String ACTION_CREATE = "create";
     private static final String ACTION_DELETE = "delete";
     private static final String FILE_PREFIX = "test-data-";
@@ -145,7 +145,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
         final Duration timeout = Duration.ofMinutes(1);
         return ApacheHttpClient.builder() //
                 .socketTimeout(Duration.ofMinutes(16)) //
-                .connectionAcquisitionTimeout(timeout) //
+                .connectionAcquisitionTimeout(Duration.ofMinutes(10)) //
                 .connectionTimeout(timeout) //
                 .build();
     }
@@ -259,9 +259,10 @@ class S3TestSetupLambdaController implements AutoCloseable {
         final String lambdaDescription = "Lambda #" + pkg.getNumber() + " of " + pkg.getTotalCount();
         try {
             LOGGER.info(() -> "Starting " + lambdaDescription + "...");
+            final Instant start = Instant.now();
             final InvokeResponse result = startLambda(event, lambdaClient);
-            LOGGER.info(() -> lambdaDescription + " finished with result " + result.statusCode() + ": "
-                    + result.payload().asUtf8String());
+            LOGGER.info(() -> lambdaDescription + " finished with status " + result.statusCode() + " and payload '"
+                    + result.payload().asUtf8String() + "' after " + Duration.between(start, Instant.now()));
         } catch (final RuntimeException exception) {
             final String message = lambdaDescription + " failed: " + exception.getMessage();
             LOGGER.severe(message);
