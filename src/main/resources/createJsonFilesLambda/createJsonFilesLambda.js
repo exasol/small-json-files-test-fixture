@@ -80,7 +80,7 @@ async function handleCreate(event, context) {
     console.log(`Creating ${numberOfFiles} files in bucket '${event.bucket}'...`);
     for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
-        const key = event.prefix + fileId + '.json';
+        const key = generateFilename(event.prefix, fileId);
         const content = generateJsonContent(fileId);
         promises.push(uploadFile(event.bucket, key, content));
         await delay(10);
@@ -95,6 +95,26 @@ async function handleCreate(event, context) {
         console.error(`Failed to create s3 files: ${error}`);
         throw error;
     }
+}
+
+/**
+ * Generates a file name with a seemingly random prefix that improves scaling by allowing S3 to partition the files.
+ * @param {string} prefix file name prefix, e.g. "test-data-"
+ * @param {number} id the file ID
+ * @returns {string} the file name
+ */
+function generateFilename(prefix, id) {
+    const prefixedId = id.toString().padStart(7, '0');
+    const hash = reverseString(prefixedId);
+    return `${prefix}${hash}-${id}.json`;
+}
+
+/**
+ * @param {string} str the string to reverse
+ * @returns {string} the reversed input string
+ */
+function reverseString(str) {
+    return str.split('').reverse().join('');
 }
 
 /**
