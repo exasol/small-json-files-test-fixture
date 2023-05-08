@@ -2,6 +2,8 @@ package com.exasol.smalljsonfilesfixture;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * This class does the book keeping for dividing an integer number of items into a number of packages.
@@ -18,7 +20,7 @@ class Packager implements Iterable<Packager.Package> {
 
     /**
      * Create a new instance.
-     * 
+     *
      * @param items       the total number of items
      * @param packageSize the maximum size of each package
      */
@@ -40,13 +42,17 @@ class Packager implements Iterable<Packager.Package> {
         return new PackageIterator();
     }
 
+    public Stream<Packager.Package> stream() {
+        return StreamSupport.stream(this.spliterator(), false);
+    }
+
     private class PackageIterator implements Iterator<Package> {
         private int itemsDelivered = 0;
         private int packagesDelivered = 0;
 
         @Override
         public boolean hasNext() {
-            return this.itemsDelivered < itemsTotal;
+            return this.itemsDelivered < Packager.this.itemsTotal;
         }
 
         @Override
@@ -54,15 +60,15 @@ class Packager implements Iterable<Packager.Package> {
             if (!hasNext()) {
                 throw new NoSuchElementException("No more packages.");
             }
-            final int size = Math.min(remaining(), packageSize);
-            final Package pkg = new Package(this.packagesDelivered, size);
+            final int size = Math.min(remaining(), Packager.this.packageSize);
+            final Package pkg = new Package(this.packagesDelivered, size, getNumberOfPackages());
             this.packagesDelivered++;
             this.itemsDelivered += size;
             return pkg;
         }
 
         private int remaining() {
-            return itemsTotal - this.itemsDelivered;
+            return Packager.this.itemsTotal - this.itemsDelivered;
         }
     }
 
@@ -74,10 +80,12 @@ class Packager implements Iterable<Packager.Package> {
     public static class Package {
         private final int number;
         private final int size;
+        private final int totalCount;
 
-        Package(final int number, final int size) {
+        Package(final int number, final int size, final int totalCount) {
             this.number = number;
             this.size = size;
+            this.totalCount = totalCount;
         }
 
         /**
@@ -92,6 +100,13 @@ class Packager implements Iterable<Packager.Package> {
          */
         public int getSize() {
             return this.size;
+        }
+
+        /**
+         * @return total number of packages.
+         */
+        public int getTotalCount() {
+            return this.totalCount;
         }
     }
 }

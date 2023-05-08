@@ -2,6 +2,7 @@ package com.exasol.smalljsonfilesfixture;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.Map;
 import java.util.Properties;
 
 import software.amazon.awssdk.auth.credentials.*;
@@ -21,7 +22,7 @@ public class TestConfig {
     }
 
     public AwsCredentialsProvider getAwsCredentialsProvider() {
-        if (this.awsProfile != null && !this.awsProfile.isBlank()) {
+        if ((this.awsProfile != null) && !this.awsProfile.isBlank()) {
             return ProfileCredentialsProvider.create(this.getAwsProfile());
         } else {
             return DefaultCredentialsProvider.builder().build();
@@ -30,20 +31,24 @@ public class TestConfig {
 
     /**
      * The AWS profile used for connecting to AWS.
-     * 
+     *
      * @return the AWS profile
      */
     public String getAwsProfile() {
-        return awsProfile;
+        return this.awsProfile;
     }
 
     /**
      * E-mail address of the contact-person for this project. Will be used in exa:owner tag for AWS resources.
-     * 
+     *
      * @return E-mail address of the contact-person
      */
     public String getOwner() {
-        return owner;
+        return this.owner;
+    }
+
+    public Map<String, String> getTags() {
+        return Map.of("exa:owner", getOwner(), "exa:project", "SJFTF");
     }
 
     private static class Reader {

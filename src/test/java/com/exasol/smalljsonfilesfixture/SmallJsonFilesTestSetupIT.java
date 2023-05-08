@@ -8,15 +8,15 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.jupiter.api.*;
 
 import software.amazon.awssdk.services.s3.S3Client;
 
 class SmallJsonFilesTestSetupIT {
+    private static final Logger LOG = Logger.getLogger(SmallJsonFilesTestSetupIT.class.getName());
     private static final TestConfig TEST_CONFIG = TestConfig.instance();
-    private static final Map<String, String> TAGS = Map.of("exa:owner", TEST_CONFIG.getOwner(), "exa:project", "SJFTF");
     private static S3Client s3Client;
     private static String bucketName;
 
@@ -29,6 +29,7 @@ class SmallJsonFilesTestSetupIT {
 
     @AfterAll
     static void afterAll() {
+        LOG.info(() -> "Deleting bucket " + bucketName + "...");
         s3Client.deleteBucket(request -> request.bucket(bucketName));
     }
 
@@ -45,13 +46,26 @@ class SmallJsonFilesTestSetupIT {
         createSetup(fileCount);
         final int elapsed = (int) (System.currentTimeMillis() - start);
         assertAll(//
-                () -> assertThat(elapsed, lessThan(1000)), //
-                () -> assertThat(countDataFiles(s3Client, bucketName), equalTo(fileCount))//
+                () -> assertThat("elapsed time [ms]", elapsed, lessThan(1000)), //
+                () -> assertThat("number of files", countDataFiles(s3Client, bucketName), equalTo(fileCount))//
         );
     }
 
+    @Test
+    void test10kFilesPerLambda() throws IOException {
+        final int count = 10_000;
+        final int countPerLambda = count;
+        createSetup(count, countPerLambda);
+        assertThat(countDataFiles(s3Client, bucketName), equalTo(count));
+    }
+
     private void createSetup(final int fileCount) throws IOException {
-        new SmallJsonFilesTestSetup().setup(TAGS, bucketName, TEST_CONFIG.getAwsCredentialsProvider(), fileCount, 10);
+        createSetup(fileCount, 10);
+    }
+
+    private void createSetup(final int fileCount, final int filesPerLambda) throws IOException {
+        new SmallJsonFilesTestSetup(TEST_CONFIG.getAwsCredentialsProvider(), TEST_CONFIG.getTags(), bucketName)
+                .setup(fileCount, filesPerLambda);
     }
 
     @Test

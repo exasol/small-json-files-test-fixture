@@ -1,5 +1,5 @@
-const AWS = require('aws-sdk');
-const https = require('https');
+import { InvokeCommand, Lambda, LogType } from '@aws-sdk/client-lambda';
+import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 /**
  * @typedef {import("aws-lambda").Context} Context
@@ -7,37 +7,32 @@ const https = require('https');
  * @typedef {{ action: string }} Event
  * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
  * @typedef {Event & { bucket: string }} DeleteAllEvent
- * @typedef {Event & { bucket: string, objects: string[] }} DeleteListEvent
+ * @typedef {Event & { bucket: string, files: string[] }} DeleteListEvent
  */
 
 /** Action for creating JSON files */
 const ACTION_CREATE = 'create';
-/** Action for deleting all objects from a bucket */
+/** Action for deleting all files from a bucket */
 const ACTION_DELETE_ALL = 'delete';
-/** Action for deleting a list of objects from a bucket */
+/** Action for deleting a list of files from a bucket */
 const ACTION_DELETE_LIST = 'deleteList';
+/**
+ * The DeleteObjectsCommand request must contain 1,000 or less files, else it will fail with the following error
+ * message:
+ *
+ * The XML you provided was not well-formed or did not validate against our published schema
+ */
+const MAX_COUNT_PER_DELETE_REQUEST = 1000;
 
-const agent = new https.Agent({
-    keepAlive: true,
-    maxSockets: 100
-});
+const s3 = new S3Client({});
+const lambdaClient = new Lambda({});
 
 /**
- * Create a new S3 client.
- *
- * @returns {AWS.S3} a new S3 client
+ * Entry point for the Lambda.
+ * @param {Event}  event the lambda event
+ * @param {Context} context the lambda context
  */
-function getS3Client() {
-    return new AWS.S3({
-        httpOptions: {
-            agent
-        }
-    });
-}
-
-// Formatter adds space after "async"
-// eslint-disable-next-line space-before-function-paren
-exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ context) => {
+export async function handler(event, context) {
     if (event.action === ACTION_CREATE) {
         await handleCreate(/** @type {CreateEvent} */(event), context);
     } else if (event.action === ACTION_DELETE_ALL) {
@@ -47,14 +42,14 @@ exports.handler = async (/** @type {Event} */ event, /** @type {Context} */ cont
     } else {
         throw Error(`Unknown action '${event.action}'`);
     }
-};
+}
 
 /**
  * Executes the given function at must three times with 10s delay.
- *
+ * @param {string} operation name of the operation to perform. This is used in log messages.
  * @param {() => Promise<unknown>} func the function to execute with retry
  */
-async function doWithRetry(func) {
+async function doWithRetry(operation, func) {
     let retryCounter = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -62,9 +57,9 @@ async function doWithRetry(func) {
             await func();
             break;
         } catch (error) {
+            console.log(`Operation '${operation}' failed after ${retryCounter} retries: ${error}`);
             if (retryCounter < 3) {
                 await delay(10000);
-                console.log(`Operation failed after ${retryCounter} retries: " ${error}`);
                 retryCounter++;
             } else {
                 throw error;
@@ -76,106 +71,206 @@ async function doWithRetry(func) {
 /**
  * @param {CreateEvent} event the event
  * @param {Context} context the lambda context
+ * @returns {Promise<string>} result message
  */
 async function handleCreate(event, context) {
-    const s3 = getS3Client();
     /** @type {Promise<unknown>[]} */
     const promises = [];
     const numberOfFiles = event.numberOfFiles;
-    console.log(`Creating ${numberOfFiles} files...`);
+    console.log(`Creating ${numberOfFiles} files in bucket '${event.bucket}'...`);
     for (let i = 0; i < numberOfFiles; i++) {
         const fileId = event.offset + i;
-        const key = event.prefix + fileId + '.json';
-        const data = {
-            id: fileId,
-            name: randomString(20)
-        };
-        const jsonData = JSON.stringify(data);
-        const params = {
-            Bucket: event.bucket,
-            Key: key,
-            Body: jsonData
-        };
-        promises.push(doWithRetry(() => s3.upload(params).promise()));
+        const key = generateFilename(event.prefix, fileId);
+        const content = generateJsonContent(fileId);
+        promises.push(uploadFile(event.bucket, key, content));
         await delay(10);
     }
     console.log('Waiting for creating to finish...');
     try {
         await Promise.all(promises);
+        const result = `Creating ${numberOfFiles} files finished.`;
+        console.log(result);
+        return result;
     } catch (error) {
-        context.fail('failed to create s3 object: ' + error);
+        console.error(`Failed to create s3 files: ${error}`);
+        throw error;
     }
 }
 
 /**
+ * Generates a file name with a seemingly random prefix that improves scaling by allowing S3 to partition the files.
+ * @param {string} prefix file name prefix, e.g. "test-data-"
+ * @param {number} id the file ID
+ * @returns {string} the file name
+ */
+function generateFilename(prefix, id) {
+    const prefixedId = id.toString().padStart(7, '0');
+    const hash = reverseString(prefixedId);
+    return `${prefix}${hash}-${id}.json`;
+}
+
+/**
+ * @param {string} str the string to reverse
+ * @returns {string} the reversed input string
+ */
+function reverseString(str) {
+    return str.split('').reverse().join('');
+}
+
+/**
+ * Upload a file to S3.
+ * @param {string} bucket  the bucket name
+ * @param {string} key the file name
+ * @param {string} content the file content
+ * @returns {Promise<unknown>} the upload result
+ */
+async function uploadFile(bucket, key, content) {
+    const command = new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: content
+    });
+    return doWithRetry(`Upload file ${key}`, () => s3.send(command));
+}
+
+/**
+ * Delete all files in the given bucket.
  * @param {DeleteAllEvent} event the event
  * @param {Context} context the lambda context
+ * @returns {Promise<string>} result message
  */
 async function handleDelete(event, context) {
-    const s3 = getS3Client();
-    const lambdaClient = new AWS.Lambda();
+    let continuationToken;
+    /** @type {string[]} */
+    let filesToDelete = [];
     /** @type {Promise<unknown>[]} */
     const promises = [];
-    let objectsPage = await s3.listObjectsV2({ Bucket: event.bucket }).promise();
-    let totalObjectCount = 0;
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        const objects = [];
-        for (const object of objectsPage.Contents) {
-            objects.push(object.Key);
+    let totalFileCount = 0;
+    console.log(`Listing files in bucket ${event.bucket}...`);
+    do {
+        const result = await listFiles(event.bucket, continuationToken);
+        continuationToken = result.continuationToken;
+        totalFileCount += result.files.length;
+        filesToDelete.push(...result.files);
+        if (filesToDelete.length >= 50000) {
+            console.log(`Calling lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
+            promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
+            filesToDelete = [];
         }
-        totalObjectCount += objects.length;
-        const callParams = JSON.stringify({
-            action: ACTION_DELETE_LIST,
-            bucket: event.bucket,
-            objects
-        });
-        console.log(`Calling lambda to delete ${objects.length} objects`);
-        promises.push(lambdaClient.invoke({ FunctionName: context.functionName, Payload: callParams }).promise());
-        await delay(5);
-        if (objectsPage.NextContinuationToken) {
-            objectsPage = await s3.listObjectsV2({
-                Bucket: event.bucket,
-                ContinuationToken: objectsPage.NextContinuationToken
-            }).promise();
-        } else {
-            break;
-        }
+    } while (continuationToken);
+    if (filesToDelete.length > 0) {
+        console.log(`Calling lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
+        promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
     }
-    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalObjectCount} objects...`);
+    console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalFileCount} files...`);
     try {
         await Promise.all(promises);
-        console.log(`Deleted ${totalObjectCount} objects`);
+        const result = `Deleted ${totalFileCount} files`;
+        console.log(result);
+        return result;
     } catch (error) {
-        context.fail('failed start delete-files lambda: ' + error);
+        console.error(`Failed to delete lambdas: ${error}`);
         throw error;
     }
 }
 
 /**
+ * Invoke the lambda to delete the given S3 files.
+ * @param {Context} context the lambda context
+ * @param {string} bucket the S3 bucket
+ * @param {string[]} files the files to delete
+ * @returns {Promise<unknown>} the invocation result
+ */
+async function invokeDeleteLambda(context, bucket, files) {
+    /** @typedef {DeleteListEvent} */
+    const callParams = {
+        action: ACTION_DELETE_LIST,
+        bucket,
+        files
+    };
+    const command = new InvokeCommand({
+        FunctionName: context.functionName,
+        Payload: new TextEncoder().encode(JSON.stringify(callParams)),
+        LogType: LogType.Tail
+    });
+    return lambdaClient.send(command);
+}
+
+/**
+ * Split the given array into chunks.
+ * @param {string[]} array the array to split
+ * @param {number} chunkSize the chunk size
+ * @returns {string[][]} the chunks
+ */
+function splitIntoChunks(array, chunkSize) {
+    const result = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+        const chunk = array.slice(i, i + chunkSize);
+        result.push(chunk);
+    }
+    return result;
+}
+
+/**
+ * List S3 files using the given pagination token.
+ * @param {string} bucket the S3 bucket
+ * @param {string} continuationToken the pagination token
+ * @returns {Promise<{files:string[], continuationToken?:string}>} the keys of all files
+ */
+async function listFiles(bucket, continuationToken) {
+    const result = await s3.send(
+        new ListObjectsV2Command({
+            Bucket: bucket,
+            ContinuationToken: continuationToken
+        })
+    );
+    const files = (result.Contents || []).map(file => file.Key);
+    return { files, continuationToken: result.NextContinuationToken };
+}
+
+/**
+ * Delete a list of keys from an S3 bucket.
  * @param {DeleteListEvent} event the event
  * @param {Context} context the lambda context
+ * @returns {Promise<string>} result message
  */
 async function handleDeleteList(event, context) {
-    const s3 = getS3Client();
     /** @type {Promise<unknown>[]} */
     const promises = [];
-    console.log(`Deleting ${event.objects.length} objects...`);
-    for (const key of event.objects) {
-        const params = { Bucket: event.bucket, Key: key };
-        promises.push(doWithRetry(() => s3.deleteObject(params).promise()));
+    const chunks = splitIntoChunks(event.files, MAX_COUNT_PER_DELETE_REQUEST);
+    console.log(`Deleting ${event.files.length} files in ${chunks.length} chunks...`);
+    for (const chunk of chunks) {
+        const identifiers = chunk.map(key => { return { Key: key }; });
+        const command = new DeleteObjectsCommand({ Bucket: event.bucket, Delete: { Objects: identifiers } });
+        promises.push(doWithRetry(`Delete ${chunk.length} files`, () => s3.send(command)));
         await delay(5);
     }
     try {
         await Promise.all(promises);
+        const status = `Deleted ${event.files.length} files in ${chunks.length} chunks`;
+        console.log(status);
+        return status;
     } catch (error) {
-        context.fail('failed to delete objects: ' + error);
+        context.fail('failed to delete files: ' + error);
         throw error;
     }
 }
 
 /**
+ * Generate JSON file content with random content.
+ * @param {number} id id for the file content
+ * @returns {string} content in JSON format
+ */
+function generateJsonContent(id) {
+    const data = {
+        id,
+        name: randomString(20)
+    };
+    return JSON.stringify(data);
+}
+
+/**
+ * Generate a random string of the given length.
  * @param {number} length length of the random string
  * @returns {string} a random string of the given length
  */
@@ -189,8 +284,9 @@ function randomString(length) {
 }
 
 /**
+ * Return a promise that waits for the given delay.
  * @param {number} ms delay in milliseconds
- * @returns {Promise<void>} promise
+ * @returns {Promise<void>} promise that waits for the given delay
  */
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
