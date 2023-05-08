@@ -150,8 +150,8 @@ async function handleDelete(event, context) {
     do {
         const result = await listFiles(event.bucket, continuationToken);
         continuationToken = result.continuationToken;
+        totalFileCount += result.files.length;
         filesToDelete.push(...result.files);
-        totalFileCount += filesToDelete.length;
         if (filesToDelete.length >= 50000) {
             console.log(`Calling lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
             promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
