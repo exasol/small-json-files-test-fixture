@@ -1,4 +1,4 @@
-# Small Json Files Test Fixture 0.1.6, released 2023-05-04
+# Small Json Files Test Fixture 0.1.6, released 2023-05-08
 
 Code name: Fix read timeout on GitHub Actions
 
