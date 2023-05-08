@@ -2,6 +2,8 @@ package com.exasol.smalljsonfilesfixture;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * This class does the book keeping for dividing an integer number of items into a number of packages.
@@ -38,6 +40,10 @@ class Packager implements Iterable<Packager.Package> {
     @Override
     public Iterator<Packager.Package> iterator() {
         return new PackageIterator();
+    }
+
+    public Stream<Packager.Package> stream() {
+        return StreamSupport.stream(this.spliterator(), false);
     }
 
     private class PackageIterator implements Iterator<Package> {
