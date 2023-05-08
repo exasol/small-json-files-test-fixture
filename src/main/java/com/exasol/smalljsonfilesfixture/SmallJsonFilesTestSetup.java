@@ -25,7 +25,7 @@ public class SmallJsonFilesTestSetup {
      * Please note that generating more than 10,000 files per lambda may fail with a
      * {@link io.netty.handler.timeout.ReadTimeoutException} when running with GitHub Actions.
      */
-    private static final int MAX_FILE_COUNT_PER_LAMBDA = 10_000;
+    private static final int MAX_FILE_COUNT_PER_LAMBDA = 5_000;
 
     private final Map<String, String> tags;
     private final AwsCredentialsProvider credentialsProvider;
