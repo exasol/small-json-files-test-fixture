@@ -74,7 +74,7 @@
 [7]: https://projects.eclipse.org/license/secondary-gpl-2.0-cp
 [8]: https://github.com/eclipse-ee4j/jsonb-api
 [9]: https://github.com/mockito/mockito
-[10]: https://github.com/mockito/mockito/blob/main/LICENSE
+[10]: https://opensource.org/licenses/MIT
 [11]: http://hamcrest.org/JavaHamcrest/
 [12]: http://opensource.org/licenses/BSD-3-Clause
 [13]: https://junit.org/junit5/
