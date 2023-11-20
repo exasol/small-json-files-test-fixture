@@ -1,14 +1,14 @@
 # Small Json Files Test Fixture 0.1.8, released 2023-11-20
 
-Code name: Upgrade dependencies on top of 0.1.8
+Code name: Fix CVE-2023-4043 in `org.eclipse.parsson:parsson`
 
 ## Summary
 
-This release excludes vulnerability CVE-2023-4586 in transitive dependency `io.netty:netty-handler` of `software.amazon.awssdk:s3`. According to [this comment](https://github.com/aws/aws-sdk-java-v2/issues/4584#issuecomment-1760547020) in the AWS SDK, the AWS SDK is not affected by this vulnerability in netty.
+This release fixes vulnerability CVE-2023-4043 in `org.eclipse.parsson:parsson`. It also excludes CVE-2023-4586 in transitive dependency `io.netty:netty-handler` of `software.amazon.awssdk:s3`. According to [this comment](https://github.com/aws/aws-sdk-java-v2/issues/4584#issuecomment-1760547020) in the AWS SDK, the AWS SDK is not affected by this vulnerability in netty.
 
 ## Security
 
-* #28: Upgrade dependencies
+* #28: Fixed CVE-2023-4043 in `org.eclipse.parsson:parsson`
 
 ## Dependency Updates
 
@@ -23,6 +23,10 @@ This release excludes vulnerability CVE-2023-4586 in transitive dependency `io.n
 * Updated `software.amazon.awssdk:lambda:2.20.97` to `2.21.26`
 * Updated `software.amazon.awssdk:s3:2.20.97` to `2.21.26`
 * Updated `software.amazon.awssdk:sts:2.20.97` to `2.21.26`
+
+#### Runtime Dependency Updates
+
+* Added `org.eclipse.parsson:parsson:1.1.5`
 
 #### Test Dependency Updates
 

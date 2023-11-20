@@ -59,6 +59,13 @@
             <version>3.0.3</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <!-- Upgrade transitive dependency of yasson to fix CVE-2023-4043 -->
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+            <version>1.1.5</version>
+            <scope>runtime</scope>
+        </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -112,6 +119,18 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.ossindex.maven</groupId>
+                <artifactId>ossindex-maven-plugin</artifactId>
+                <configuration>
+                    <excludeVulnerabilityIds>
+                        <!-- Transitive dependency io.netty:netty-handler of software.amazon.awssdk.
+                            According to https://github.com/aws/aws-sdk-java-v2/issues/4584#issuecomment-1760547020
+                            we are not affected. -->
+                        <exclude>CVE-2023-4586</exclude>
+                    </excludeVulnerabilityIds>
+                </configuration>
             </plugin>
         </plugins>
     </build>
