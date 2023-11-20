@@ -1,4 +1,4 @@
-# Small Json Files Test Fixture 0.1.8, released 2023-11-20
+# Small Json Files Test Fixture 0.1.8, released 2023-11-21
 
 Code name: Fix CVE-2023-4043 in `org.eclipse.parsson:parsson`
 
