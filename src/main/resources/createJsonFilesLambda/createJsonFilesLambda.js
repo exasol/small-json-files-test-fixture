@@ -4,10 +4,10 @@ import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand, S3Client 
 /**
  * @typedef {import("aws-lambda").Context} Context
  * @typedef {import("aws-lambda").Callback} Callback
- * @typedef {{ action: string }} Event
- * @typedef {Event & { numberOfFiles: number; offset: number; prefix: string; bucket: string; }} CreateEvent
- * @typedef {Event & { bucket: string }} DeleteAllEvent
- * @typedef {Event & { bucket: string, files: string[] }} DeleteListEvent
+ * @typedef {{ action: "create", numberOfFiles: number, offset: number, prefix: string, bucket: string }} CreateEvent
+ * @typedef {{ action: "delete", bucket: string }} DeleteAllEvent
+ * @typedef {{ action: "deleteList", bucket: string, files: string[] }} DeleteListEvent
+ * @typedef { CreateEvent | DeleteAllEvent | DeleteListEvent } Event
  */
 
 /** Action for creating JSON files */
@@ -33,14 +33,15 @@ const lambdaClient = new Lambda({});
  * @param {Context} context the lambda context
  */
 export async function handler(event, context) {
+    const action = event.action;
     if (event.action === ACTION_CREATE) {
-        await handleCreate(/** @type {CreateEvent} */(event), context);
+        await handleCreate(event, context);
     } else if (event.action === ACTION_DELETE_ALL) {
-        await handleDelete(/** @type {DeleteAllEvent} */(event), context);
+        await handleDelete(event, context);
     } else if (event.action === ACTION_DELETE_LIST) {
-        await handleDeleteList(/** @type {DeleteListEvent} */(event), context);
+        await handleDeleteList(event, context);
     } else {
-        throw Error(`Unknown action '${event.action}'`);
+        throw Error(`Unknown action '${action}'`);
     }
 }
 
