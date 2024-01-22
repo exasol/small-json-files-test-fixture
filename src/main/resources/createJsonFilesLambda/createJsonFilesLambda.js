@@ -140,15 +140,10 @@ async function uploadFile(bucket, key, content) {
         Body: content
     });
 
-    /**
-     * Perform the upload.
-     * @returns {Promise<boolean>} `true` if the the action was successful
-     */
-    async function upload() {
+    return doWithRetry(`Upload file ${key}`, async function upload() {
         await s3.send(command);
         return true;
-    }
-    return doWithRetry(`Upload file ${key}`, upload);
+    });
 }
 
 /**
