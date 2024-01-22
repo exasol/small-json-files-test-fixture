@@ -36,11 +36,11 @@ const lambdaClient = new Lambda({});
 export async function handler(event, context) {
     const action = event.action;
     if (event.action === ACTION_CREATE) {
-        return await handleCreate(event, context);
+        return await handleCreate(event);
     } else if (event.action === ACTION_DELETE_ALL) {
         return await handleDelete(event, context);
     } else if (event.action === ACTION_DELETE_LIST) {
-        return await handleDeleteList(event, context);
+        return await handleDeleteList(event);
     } else {
         throw Error(`Unknown action '${action}'`);
     }
@@ -73,10 +73,9 @@ async function doWithRetry(operation, func) {
 
 /**
  * @param {CreateEvent} event the event
- * @param {Context} context the lambda context
  * @returns {Promise<string>} result message
  */
-async function handleCreate(event, context) {
+async function handleCreate(event) {
     /** @type {Promise<boolean>[]} */
     const promises = [];
     const numberOfFiles = event.numberOfFiles;
@@ -261,10 +260,9 @@ async function listFiles(bucket, continuationToken) {
 /**
  * Delete a list of keys from an S3 bucket.
  * @param {DeleteListEvent} event the event
- * @param {Context} context the lambda context
  * @returns {Promise<string>} result message
  */
-async function handleDeleteList(event, context) {
+async function handleDeleteList(event) {
     /** @type {Promise<unknown>[]} */
     const promises = [];
     const chunks = splitIntoChunks(event.files, MAX_COUNT_PER_DELETE_REQUEST);
@@ -275,15 +273,10 @@ async function handleDeleteList(event, context) {
         promises.push(doWithRetry(`Delete ${chunk.length} files`, () => s3.send(command)));
         await delay(5);
     }
-    try {
-        await Promise.all(promises);
-        const status = `Deleted ${event.files.length} files in ${chunks.length} chunks`;
-        console.log(status);
-        return status;
-    } catch (error) {
-        context.fail('failed to delete files: ' + error);
-        throw error;
-    }
+    await Promise.all(promises);
+    const status = `Deleted ${event.files.length} files in ${chunks.length} chunks`;
+    console.log(status);
+    return status;
 }
 
 /**
