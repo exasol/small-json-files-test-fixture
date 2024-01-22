@@ -41,7 +41,7 @@
 | [Apache Maven Compiler Plugin][25]                      | [Apache-2.0][16]                  |
 | [Apache Maven Enforcer Plugin][26]                      | [Apache-2.0][16]                  |
 | [Maven Flatten Plugin][27]                              | [Apache Software Licenese][16]    |
-| [Project keeper maven plugin][28]                       | [The MIT License][29]             |
+| [Project Keeper Maven plugin][28]                       | [The MIT License][29]             |
 | [org.sonatype.ossindex.maven:ossindex-maven-plugin][30] | [ASL2][31]                        |
 | [Maven Surefire Plugin][32]                             | [Apache-2.0][16]                  |
 | [Versions Maven Plugin][33]                             | [Apache License, Version 2.0][16] |
@@ -113,6 +113,6 @@
 [45]: https://github.com/exasol/error-code-crawler-maven-plugin/
 [46]: https://github.com/exasol/error-code-crawler-maven-plugin/blob/main/LICENSE
 [47]: http://zlika.github.io/reproducible-build-maven-plugin
-[48]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.363.0.tgz
+[48]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.496.0.tgz
 [49]: https://github.com/aws/aws-sdk-js-v3
-[50]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.363.0.tgz
+[50]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.496.0.tgz

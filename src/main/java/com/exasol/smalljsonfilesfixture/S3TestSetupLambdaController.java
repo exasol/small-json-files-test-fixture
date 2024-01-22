@@ -99,7 +99,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
      * Delete the test files from the bucket.
      */
     public void deleteFiles() {
-        LOGGER.info(() -> "Deleting small-json-files test setup from bucket " + this.bucket + "...");
+        LOGGER.info(() -> "Deleting all files from bucket " + this.bucket + "...");
         final Instant start = Instant.now();
         final JsonObjectBuilder eventBuilder = Json.createObjectBuilder();
         eventBuilder.add("action", ACTION_DELETE);
@@ -107,10 +107,11 @@ class S3TestSetupLambdaController implements AutoCloseable {
         try (final var lambdaClient = createLambdaClient()) {
             final InvokeResponse result = startLambda(eventBuilder.build(), lambdaClient);
             if (result.functionError() != null) {
-                throw new IllegalStateException(
-                        "Deleting files from bucket " + this.bucket + " failed: " + result.payload().asUtf8String());
+                throw new IllegalStateException("Deleting files from bucket " + this.bucket + " failed: "
+                        + result.functionError() + ", payload: " + result.payload().asUtf8String());
             }
-            LOGGER.info(() -> "Delete done in " + Duration.between(start, Instant.now()));
+            LOGGER.info(() -> "Delete done in " + Duration.between(start, Instant.now()) + ", log:\n"
+                    + getLogResult(result));
         }
     }
 
@@ -122,7 +123,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
                     builder -> builder.functionName(this.lambdaFunctionName).architectures(Architecture.ARM64) //
                             .code(codeBuilder -> codeBuilder.zipFile(zipBytes)) //
                             .role(role.arn()) //
-                            .runtime(Runtime.NODEJS18_X) //
+                            .runtime(Runtime.NODEJS20_X) //
                             .handler("createJsonFilesLambda.handler") //
                             .timeout(15 * 60) //
                             .tags(this.tags));
@@ -130,7 +131,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
         }
         this.createdResources.add(() -> {
             try (final LambdaClient lambdaClient = createLambdaClient()) {
-                LOGGER.fine(() -> "Deleting lambda " + this.lambdaFunctionName);
+                LOGGER.fine(() -> "Deleting lambda " + this.lambdaFunctionName + "...");
                 lambdaClient.deleteFunction(request -> request.functionName(this.lambdaFunctionName));
             }
         });
@@ -165,7 +166,7 @@ class S3TestSetupLambdaController implements AutoCloseable {
         iamClient.attachRolePolicy(request -> request.roleName(this.roleName).policyArn(policy.arn()));
         this.createdResources.add(
                 () -> iamClient.detachRolePolicy(request -> request.policyArn(policy.arn()).roleName(role.roleName())));
-        sleep("role '" + this.roleName + "' being fully created", Duration.ofSeconds(30));
+        sleep("role '" + this.roleName + "' being fully created", Duration.ofSeconds(20));
         return role;
     }
 
@@ -183,7 +184,9 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     private String getPolicyDocument() {
         final String policyTemplate = getResourceAsString("createJsonFilesLambda/policy.json");
-        return policyTemplate.replace("{ACCOUNT}", this.accountId).replace("{BUCKET}", this.bucket)
+        return policyTemplate //
+                .replace("{ACCOUNT}", this.accountId) //
+                .replace("{BUCKET}", this.bucket) //
                 .replace("{FUNCTION}", this.lambdaFunctionName);
     }
 
@@ -263,11 +266,16 @@ class S3TestSetupLambdaController implements AutoCloseable {
             final InvokeResponse result = startLambda(event, lambdaClient);
             LOGGER.info(() -> lambdaDescription + " finished with status " + result.statusCode() + " and payload '"
                     + result.payload().asUtf8String() + "' after " + Duration.between(start, Instant.now()));
+            LOGGER.finest(() -> "Log result for " + lambdaDescription + ":\n" + getLogResult(result));
         } catch (final RuntimeException exception) {
             final String message = lambdaDescription + " failed: " + exception.getMessage();
             LOGGER.severe(message);
             throw new IllegalStateException(message, exception);
         }
+    }
+
+    private String getLogResult(final InvokeResponse response) {
+        return new String(Base64.getDecoder().decode(response.logResult()), StandardCharsets.UTF_8);
     }
 
     private JsonObject createLambdaEvent(final int filesPerLambda, final int lambdaCounter) {
@@ -309,5 +317,6 @@ class S3TestSetupLambdaController implements AutoCloseable {
         } catch (final IOException exception) {
             throw new UncheckedIOException("Failed to delete resources. Please delete them manually.", exception);
         }
+        LOGGER.fine(() -> "All resources deleted");
     }
 }
