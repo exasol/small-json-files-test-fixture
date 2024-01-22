@@ -120,18 +120,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.sonatype.ossindex.maven</groupId>
-                <artifactId>ossindex-maven-plugin</artifactId>
-                <configuration>
-                    <excludeVulnerabilityIds>
-                        <!-- Transitive dependency io.netty:netty-handler of software.amazon.awssdk.
-                            According to https://github.com/aws/aws-sdk-java-v2/issues/4584#issuecomment-1760547020
-                            we are not affected. -->
-                        <exclude>CVE-2023-4586</exclude>
-                    </excludeVulnerabilityIds>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <parent>
