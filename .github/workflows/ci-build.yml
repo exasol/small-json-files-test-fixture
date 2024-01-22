@@ -35,11 +35,6 @@ jobs:
       - name: Create test_config.properties
         run: |
           echo "owner = ${{ secrets.AWS_TAG_OWNER }}" > test_config.properties
-      - name: Lint JavaScript Lambda code
-        run: |
-          cd src/main/resources/createJsonFilesLambda
-          npm ci
-          npm run lint
       - name: Run tests and build with Maven
         run: |
           mvn --batch-mode clean verify \

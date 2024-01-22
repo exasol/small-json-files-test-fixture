@@ -56,6 +56,8 @@
 | [error-code-crawler-maven-plugin][44]                   | [MIT License][45]                 |
 | [Reproducible Build Maven Plugin][46]                   | [Apache 2.0][30]                  |
 | [Project Keeper Maven plugin][47]                       | [The MIT License][48]             |
+| [Apache Maven Clean Plugin][49]                         | [Apache-2.0][16]                  |
+| [Exec Maven Plugin][50]                                 | [Apache License 2][16]            |
 
 ## Createjsonfileslambda
 
@@ -63,8 +65,8 @@
 
 | Dependency                   | License          |
 | ---------------------------- | ---------------- |
-| [@aws-sdk/client-lambda][49] | [Apache-2.0][50] |
-| [@aws-sdk/client-s3][51]     | [Apache-2.0][50] |
+| [@aws-sdk/client-lambda][51] | [Apache-2.0][52] |
+| [@aws-sdk/client-s3][53]     | [Apache-2.0][52] |
 
 [0]: https://aws.amazon.com/sdkforjava
 [1]: https://aws.amazon.com/apache2.0
@@ -115,6 +117,8 @@
 [46]: http://zlika.github.io/reproducible-build-maven-plugin
 [47]: https://github.com/exasol/project-keeper/
 [48]: https://github.com/exasol/project-keeper/blob/main/LICENSE
-[49]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.496.0.tgz
-[50]: https://github.com/aws/aws-sdk-js-v3
-[51]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.496.0.tgz
+[49]: https://maven.apache.org/plugins/maven-clean-plugin/
+[50]: https://www.mojohaus.org/exec-maven-plugin
+[51]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.496.0.tgz
+[52]: https://github.com/aws/aws-sdk-js-v3
+[53]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.496.0.tgz

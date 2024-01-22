@@ -120,6 +120,53 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/resources/createJsonFilesLambda/node_modules</directory>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>npm-ci</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>src/main/resources/createJsonFilesLambda/</workingDirectory>
+                            <executable>npm</executable>
+                            <commandlineArgs>ci</commandlineArgs>
+                            <useMavenLogger>false</useMavenLogger>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>lint-lambda</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>src/main/resources/createJsonFilesLambda/</workingDirectory>
+                            <executable>npm</executable>
+                            <commandlineArgs>run lint</commandlineArgs>
+                            <useMavenLogger>false</useMavenLogger>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <parent>
