@@ -31,32 +31,34 @@ const lambdaClient = new Lambda({});
  * Entry point for the Lambda.
  * @param {Event}  event the lambda event
  * @param {Context} context the lambda context
+ * @returns {Promise<string>} result of the operation
  */
 export async function handler(event, context) {
     const action = event.action;
     if (event.action === ACTION_CREATE) {
-        await handleCreate(event, context);
+        return await handleCreate(event);
     } else if (event.action === ACTION_DELETE_ALL) {
-        await handleDelete(event, context);
+        return await handleDelete(event, context);
     } else if (event.action === ACTION_DELETE_LIST) {
-        await handleDeleteList(event, context);
+        return await handleDeleteList(event);
     } else {
         throw Error(`Unknown action '${action}'`);
     }
 }
 
 /**
- * Executes the given function at must three times with 10s delay.
+ * Executes the given function at most three times with 10s delay.
+ * @template T result type
  * @param {string} operation name of the operation to perform. This is used in log messages.
- * @param {() => Promise<unknown>} func the function to execute with retry
+ * @param {() => Promise<T>} func the function to execute with retry
+ * @returns {Promise<T>} result
  */
 async function doWithRetry(operation, func) {
     let retryCounter = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
         try {
-            await func();
-            break;
+            return await func();
         } catch (error) {
             console.log(`Operation '${operation}' failed after ${retryCounter} retries: ${error}`);
             if (retryCounter < 3) {
@@ -71,11 +73,10 @@ async function doWithRetry(operation, func) {
 
 /**
  * @param {CreateEvent} event the event
- * @param {Context} context the lambda context
  * @returns {Promise<string>} result message
  */
-async function handleCreate(event, context) {
-    /** @type {Promise<unknown>[]} */
+async function handleCreate(event) {
+    /** @type {Promise<boolean>[]} */
     const promises = [];
     const numberOfFiles = event.numberOfFiles;
     console.log(`Creating ${numberOfFiles} files in bucket '${event.bucket}'...`);
@@ -88,7 +89,14 @@ async function handleCreate(event, context) {
     }
     console.log('Waiting for creating to finish...');
     try {
-        await Promise.all(promises);
+        const allResults = await Promise.all(promises);
+        if (allResults.length !== numberOfFiles) {
+            throw new Error(`Expected ${numberOfFiles} results but got ${allResults.length}`);
+        }
+        const failedResults = allResults.filter(r => !r).length;
+        if (failedResults > 0) {
+            throw new Error(`${failedResults} lambdas failed`);
+        }
         const result = `Creating ${numberOfFiles} files finished.`;
         console.log(result);
         return result;
@@ -123,7 +131,7 @@ function reverseString(str) {
  * @param {string} bucket  the bucket name
  * @param {string} key the file name
  * @param {string} content the file content
- * @returns {Promise<unknown>} the upload result
+ * @returns {Promise<boolean>} the upload result
  */
 async function uploadFile(bucket, key, content) {
     const command = new PutObjectCommand({
@@ -131,7 +139,11 @@ async function uploadFile(bucket, key, content) {
         Key: key,
         Body: content
     });
-    return doWithRetry(`Upload file ${key}`, () => s3.send(command));
+
+    return doWithRetry(`Upload file ${key}`, async function upload() {
+        await s3.send(command);
+        return true;
+    });
 }
 
 /**
@@ -144,29 +156,31 @@ async function handleDelete(event, context) {
     let continuationToken;
     /** @type {string[]} */
     let filesToDelete = [];
-    /** @type {Promise<unknown>[]} */
+    /** @type {Promise<string>[]} */
     const promises = [];
     let totalFileCount = 0;
     console.log(`Listing files in bucket ${event.bucket}...`);
+    let lambdaCount = 0;
     do {
         const result = await listFiles(event.bucket, continuationToken);
         continuationToken = result.continuationToken;
         totalFileCount += result.files.length;
         filesToDelete.push(...result.files);
         if (filesToDelete.length >= 50000) {
-            console.log(`Calling lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
+            console.log(`Calling lambda #${lambdaCount++} to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
             promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
+            await delay(10);
             filesToDelete = [];
         }
     } while (continuationToken);
     if (filesToDelete.length > 0) {
-        console.log(`Calling lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
+        console.log(`Calling last lambda to delete ${filesToDelete.length} files, total file count: ${totalFileCount}`);
         promises.push(invokeDeleteLambda(context, event.bucket, filesToDelete));
     }
     console.log(`Waiting for ${promises.length} lambdas to finish deleting ${totalFileCount} files...`);
     try {
-        await Promise.all(promises);
-        const result = `Deleted ${totalFileCount} files`;
+        const lambdaResults = await Promise.all(promises);
+        const result = `Deleted ${totalFileCount} files using ${lambdaResults.length} lambdas`;
         console.log(result);
         return result;
     } catch (error) {
@@ -180,7 +194,7 @@ async function handleDelete(event, context) {
  * @param {Context} context the lambda context
  * @param {string} bucket the S3 bucket
  * @param {string[]} files the files to delete
- * @returns {Promise<unknown>} the invocation result
+ * @returns {Promise<string>} the invocation result
  */
 async function invokeDeleteLambda(context, bucket, files) {
     /** @typedef {DeleteListEvent} */
@@ -192,9 +206,18 @@ async function invokeDeleteLambda(context, bucket, files) {
     const command = new InvokeCommand({
         FunctionName: context.functionName,
         Payload: new TextEncoder().encode(JSON.stringify(callParams)),
-        LogType: LogType.Tail
+        LogType: LogType.None,
+        InvocationType: 'RequestResponse' // 'Event' will cause the following error:
+        // Runtime.UnhandledPromiseRejection: RequestEntityTooLargeException: 1594530 byte payload is too large for the Event invocation type (limit 262144 bytes)
     });
-    return lambdaClient.send(command);
+    const result = await lambdaClient.send(command);
+
+    let payload = '<no payload>';
+    if (result.Payload) {
+        payload = result.Payload.transformToString('utf-8');
+    }
+    console.log(`Invoke lambda result: status ${result.StatusCode}, error: ${result.FunctionError}, payload: ${payload}`);
+    return payload;
 }
 
 /**
@@ -232,29 +255,23 @@ async function listFiles(bucket, continuationToken) {
 /**
  * Delete a list of keys from an S3 bucket.
  * @param {DeleteListEvent} event the event
- * @param {Context} context the lambda context
  * @returns {Promise<string>} result message
  */
-async function handleDeleteList(event, context) {
+async function handleDeleteList(event) {
     /** @type {Promise<unknown>[]} */
     const promises = [];
     const chunks = splitIntoChunks(event.files, MAX_COUNT_PER_DELETE_REQUEST);
-    console.log(`Deleting ${event.files.length} files in ${chunks.length} chunks...`);
+    console.log(`Deleting ${event.files.length} files in ${chunks.length} chunks with ${MAX_COUNT_PER_DELETE_REQUEST} files each...`);
     for (const chunk of chunks) {
         const identifiers = chunk.map(key => { return { Key: key }; });
         const command = new DeleteObjectsCommand({ Bucket: event.bucket, Delete: { Objects: identifiers } });
         promises.push(doWithRetry(`Delete ${chunk.length} files`, () => s3.send(command)));
         await delay(5);
     }
-    try {
-        await Promise.all(promises);
-        const status = `Deleted ${event.files.length} files in ${chunks.length} chunks`;
-        console.log(status);
-        return status;
-    } catch (error) {
-        context.fail('failed to delete files: ' + error);
-        throw error;
-    }
+    await Promise.all(promises);
+    const status = `Deleted ${event.files.length} files in ${chunks.length} chunks`;
+    console.log(status);
+    return status;
 }
 
 /**

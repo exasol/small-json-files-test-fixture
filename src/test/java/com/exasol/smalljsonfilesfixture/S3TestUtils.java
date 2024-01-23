@@ -23,7 +23,8 @@ public class S3TestUtils {
 
     public static void emptyS3Bucket(final String bucketName, final S3Client s3Client) {
         LOG.info(() -> "Deleting all objects from bucket " + bucketName + "...");
-        s3Client.listObjectsV2Paginator(request -> request.bucket(bucketName).maxKeys(MAX_COUNT_PER_DELETE_REQUEST)) //
+        s3Client.listObjectsV2Paginator(request -> request.bucket(bucketName).maxKeys(MAX_COUNT_PER_DELETE_REQUEST)
+                .encodingType(EncodingType.URL)) //
                 .stream() //
                 .map(page -> createDeleteRequest(bucketName, page)) //
                 .filter(Optional::isPresent) //
