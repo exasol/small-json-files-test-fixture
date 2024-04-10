@@ -76,7 +76,7 @@
 [5]: https://github.com/eclipse-ee4j/jsonp
 [6]: https://projects.eclipse.org/license/epl-2.0
 [7]: https://projects.eclipse.org/license/secondary-gpl-2.0-cp
-[8]: https://github.com/eclipse-ee4j/jsonb-api
+[8]: https://jakartaee.github.io/jsonb-api
 [9]: https://github.com/mockito/mockito
 [10]: https://opensource.org/licenses/MIT
 [11]: http://hamcrest.org/JavaHamcrest/
