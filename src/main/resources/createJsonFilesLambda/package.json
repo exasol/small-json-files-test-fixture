@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "eslint": "eslint .",
-    "typecheck": "tsc --project jsconfig.json",
+    "typecheck": "tsc --project jsconfig.json --maxNodeModuleJsDepth 0",
     "lint": "npm run eslint && npm run typecheck"
   },
   "devDependencies": {

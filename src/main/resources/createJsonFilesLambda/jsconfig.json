@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2021",
+    "target": "es2022",
     "checkJs": true
   },
-  "include": ["createJsonFilesLambda.js"],
+  "include": ["*.js"],
   "exclude": ["node_modules"]
 }
