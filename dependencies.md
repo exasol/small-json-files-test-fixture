@@ -52,7 +52,7 @@
 | [Apache Maven Javadoc Plugin][38]                       | [Apache-2.0][16]                  |
 | [Nexus Staging Maven Plugin][39]                        | [Eclipse Public License][40]      |
 | [Maven Failsafe Plugin][41]                             | [Apache-2.0][16]                  |
-| [JaCoCo :: Maven Plugin][42]                            | [Eclipse Public License 2.0][43]  |
+| [JaCoCo :: Maven Plugin][42]                            | [EPL-2.0][43]                     |
 | [error-code-crawler-maven-plugin][44]                   | [MIT License][45]                 |
 | [Reproducible Build Maven Plugin][46]                   | [Apache 2.0][30]                  |
 | [Project Keeper Maven plugin][47]                       | [The MIT License][48]             |
@@ -76,7 +76,7 @@
 [5]: https://github.com/eclipse-ee4j/jsonp
 [6]: https://projects.eclipse.org/license/epl-2.0
 [7]: https://projects.eclipse.org/license/secondary-gpl-2.0-cp
-[8]: https://github.com/eclipse-ee4j/jsonb-api
+[8]: https://jakartaee.github.io/jsonb-api
 [9]: https://github.com/mockito/mockito
 [10]: https://opensource.org/licenses/MIT
 [11]: http://hamcrest.org/JavaHamcrest/
@@ -119,6 +119,6 @@
 [48]: https://github.com/exasol/project-keeper/blob/main/LICENSE
 [49]: https://maven.apache.org/plugins/maven-clean-plugin/
 [50]: https://www.mojohaus.org/exec-maven-plugin
-[51]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.496.0.tgz
+[51]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.552.0.tgz
 [52]: https://github.com/aws/aws-sdk-js-v3
-[53]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.496.0.tgz
+[53]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.552.0.tgz
