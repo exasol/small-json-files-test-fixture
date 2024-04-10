@@ -71,6 +71,8 @@ public final class TestSetupDescription {
      * @param json JSON string
      * @return deserialized {@link TestSetupDescription}
      */
+    @SuppressWarnings("try") // Auto-closeable resource Jsonb has a member method close() that could throw
+                             // InterruptedException
     public static TestSetupDescription fromJson(final String json) {
         try (final Jsonb jsonb = JsonbBuilder.create()) {
             return jsonb.fromJson(json, TestSetupDescription.class);
@@ -85,6 +87,8 @@ public final class TestSetupDescription {
      * 
      * @return JSON string
      */
+    @SuppressWarnings("try") // Auto-closeable resource Jsonb has a member method close() that could throw
+                             // InterruptedException
     public String toJson() {
         try (final Jsonb jsonb = JsonbBuilder.create()) {
             return jsonb.toJson(this);
