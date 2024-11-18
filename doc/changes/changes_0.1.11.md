@@ -45,9 +45,10 @@ This release fixes CVE-2024-47535 in `io.netty:netty-common:jar:4.1.108.Final:ru
 * Updated `org.apache.maven.plugins:maven-enforcer-plugin:3.4.1` to `3.5.0`
 * Updated `org.apache.maven.plugins:maven-failsafe-plugin:3.2.5` to `3.5.1`
 * Updated `org.apache.maven.plugins:maven-gpg-plugin:3.2.2` to `3.2.7`
-* Updated `org.apache.maven.plugins:maven-install-plugin:3.1.2` to `3.1.3`
+* Updated `org.apache.maven.plugins:maven-install-plugin:2.4` to `3.1.3`
 * Updated `org.apache.maven.plugins:maven-javadoc-plugin:3.6.3` to `3.10.1`
-* Updated `org.apache.maven.plugins:maven-site-plugin:3.12.1` to `3.9.1`
+* Updated `org.apache.maven.plugins:maven-resources-plugin:2.6` to `3.3.1`
+* Updated `org.apache.maven.plugins:maven-site-plugin:3.3` to `3.9.1`
 * Updated `org.apache.maven.plugins:maven-surefire-plugin:3.2.5` to `3.5.1`
 * Updated `org.apache.maven.plugins:maven-toolchains-plugin:3.1.0` to `3.2.0`
 * Updated `org.codehaus.mojo:versions-maven-plugin:2.16.2` to `2.17.1`
