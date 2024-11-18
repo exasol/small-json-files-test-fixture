@@ -1,16 +1,39 @@
-# Small Json Files Test Fixture 0.1.11, released 2024-??-??
+# Small Json Files Test Fixture 0.1.11, released 2024-11-18
 
-Code name:
+Code name: Fix CVE-2024-47535: io.netty:netty-common:jar:4.1.108.Final:runtime
 
 ## Summary
 
-## Features
+This release fixes CVE-2024-47535 in `io.netty:netty-common:jar:4.1.108.Final:runtime`.
 
-* ISSUE_NUMBER: description
+## Security
+
+* #35: Fixed CVE-2024-47535 in `io.netty:netty-common:jar:4.1.108.Final:runtime`
 
 ## Dependency Updates
 
 ### Small Json Files Test Fixture
+
+#### Compile Dependency Updates
+
+* Updated `org.mockito:mockito-core:5.11.0` to `5.14.2`
+* Updated `software.amazon.awssdk:apache-client:2.25.28` to `2.29.15`
+* Updated `software.amazon.awssdk:iam:2.25.28` to `2.29.15`
+* Updated `software.amazon.awssdk:lambda:2.25.28` to `2.29.15`
+* Updated `software.amazon.awssdk:s3:2.25.28` to `2.29.15`
+* Updated `software.amazon.awssdk:sts:2.25.28` to `2.29.15`
+
+#### Runtime Dependency Updates
+
+* Removed `org.eclipse.parsson:parsson:1.1.6`
+* Updated `org.eclipse:yasson:3.0.3` to `3.0.4`
+
+#### Test Dependency Updates
+
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.16.1` to `3.17.3`
+* Updated `org.hamcrest:hamcrest:2.2` to `3.0`
+* Updated `org.junit.jupiter:junit-jupiter-params:5.10.2` to `5.11.3`
+* Updated `org.slf4j:slf4j-jdk14:2.0.12` to `2.0.16`
 
 #### Plugin Dependency Updates
 
