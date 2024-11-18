@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>small-json-files-test-fixture</artifactId>
-    <version>0.1.10</version>
+    <version>0.1.11</version>
     <name>Small Json Files Test Fixture</name>
     <description>Test fixture with many small JSON files on S3.</description>
     <url>https://github.com/exasol/small-json-files-test-fixture/</url>
@@ -11,7 +11,7 @@
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
-                <version>2.25.28</version>
+                <version>2.29.15</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -56,45 +56,38 @@
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>yasson</artifactId>
-            <version>3.0.3</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <!-- Upgrade transitive dependency of yasson to fix CVE-2023-4043 -->
-            <groupId>org.eclipse.parsson</groupId>
-            <artifactId>parsson</artifactId>
-            <version>1.1.6</version>
+            <version>3.0.4</version>
             <scope>runtime</scope>
         </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
-            <version>2.2</version>
+            <version>3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.10.2</version>
+            <version>5.11.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.11.0</version>
+            <version>5.14.2</version>
         </dependency>
         <!--Integration test dependencies-->
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.16.1</version>
+            <version>3.17.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>2.0.12</version>
+            <version>2.0.16</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -111,7 +104,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>4.3.0</version>
+                <version>4.4.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -172,7 +165,7 @@
     <parent>
         <artifactId>small-json-files-test-fixture-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>0.1.10</version>
+        <version>0.1.11</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
