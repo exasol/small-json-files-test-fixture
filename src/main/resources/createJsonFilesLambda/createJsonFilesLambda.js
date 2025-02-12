@@ -55,7 +55,6 @@ export async function handler(event, context) {
  */
 async function doWithRetry(operation, func) {
     let retryCounter = 0;
-    // eslint-disable-next-line no-constant-condition
     while (true) {
         try {
             return await func();

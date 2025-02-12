@@ -1,18 +1,9 @@
-import globals from 'globals'
+import globals from "globals";
+import pluginJs from "@eslint/js";
 
-import { FlatCompat } from '@eslint/eslintrc'
-import pluginJs from '@eslint/js'
 
-const compat = new FlatCompat({ recommendedConfig: pluginJs.configs.recommended })
-
+/** @type {import('eslint').Linter.Config[]} */
 export default [
-    { languageOptions: { globals: globals.browser } },
-    ...compat.extends('standard'),
-    {
-        rules: {
-            indent: ['error', 4],
-            'space-before-function-paren': ['error', 'never'],
-            semi: ['off']
-        }
-    }
-]
+  {languageOptions: { globals: globals.browser }},
+  pluginJs.configs.recommended,
+];
