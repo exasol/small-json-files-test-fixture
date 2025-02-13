@@ -40,7 +40,7 @@
 | [Apache Maven Clean Plugin][24]                         | [Apache-2.0][16]                  |
 | [Apache Maven Install Plugin][25]                       | [Apache-2.0][16]                  |
 | [Apache Maven Resources Plugin][26]                     | [Apache-2.0][16]                  |
-| [Apache Maven Site Plugin][27]                          | [Apache License, Version 2.0][16] |
+| [Apache Maven Site Plugin][27]                          | [Apache-2.0][16]                  |
 | [SonarQube Scanner for Maven][28]                       | [GNU LGPL 3][29]                  |
 | [Apache Maven Toolchains Plugin][30]                    | [Apache-2.0][16]                  |
 | [Apache Maven Compiler Plugin][31]                      | [Apache-2.0][16]                  |
@@ -99,7 +99,7 @@
 [25]: https://maven.apache.org/plugins/maven-install-plugin/
 [26]: https://maven.apache.org/plugins/maven-resources-plugin/
 [27]: https://maven.apache.org/plugins/maven-site-plugin/
-[28]: http://sonarsource.github.io/sonar-scanner-maven/
+[28]: http://docs.sonarqube.org/display/PLUG/Plugin+Library/sonar-maven-plugin
 [29]: http://www.gnu.org/licenses/lgpl.txt
 [30]: https://maven.apache.org/plugins/maven-toolchains-plugin/
 [31]: https://maven.apache.org/plugins/maven-compiler-plugin/
@@ -126,6 +126,6 @@
 [52]: https://github.com/exasol/error-code-crawler-maven-plugin/blob/main/LICENSE
 [53]: http://zlika.github.io/reproducible-build-maven-plugin
 [54]: https://www.mojohaus.org/exec-maven-plugin
-[55]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.552.0.tgz
+[55]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.744.0.tgz
 [56]: https://github.com/aws/aws-sdk-js-v3
-[57]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.552.0.tgz
+[57]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.744.0.tgz
