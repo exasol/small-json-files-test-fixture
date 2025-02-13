@@ -1,4 +1,4 @@
-# Small Json Files Test Fixture 0.1.12, released 2025-02-12
+# Small Json Files Test Fixture 0.1.12, released 2025-02-13
 
 Code name: Fix vulnerabilities CVE-2025-25193 and CVE-2025-24970 in dependencies
 
