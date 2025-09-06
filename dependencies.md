@@ -24,7 +24,7 @@
 | [Hamcrest][11]                             | [BSD-3-Clause][12]                |
 | [JUnit Jupiter Params][13]                 | [Eclipse Public License v2.0][14] |
 | [EqualsVerifier \| release normal jar][15] | [Apache License, Version 2.0][16] |
-| [SLF4J JDK14 Provider][17]                 | [MIT License][18]                 |
+| [SLF4J JDK14 Provider][17]                 | [MIT][18]                         |
 
 ### Runtime Dependencies
 
@@ -85,12 +85,12 @@
 [10]: https://opensource.org/licenses/MIT
 [11]: http://hamcrest.org/JavaHamcrest/
 [12]: https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE
-[13]: https://junit.org/junit5/
+[13]: https://junit.org/
 [14]: https://www.eclipse.org/legal/epl-v20.html
 [15]: https://www.jqno.nl/equalsverifier
 [16]: https://www.apache.org/licenses/LICENSE-2.0.txt
 [17]: http://www.slf4j.org
-[18]: http://www.opensource.org/licenses/mit-license.php
+[18]: https://opensource.org/license/mit
 [19]: https://projects.eclipse.org/projects/ee4j.yasson
 [20]: http://www.eclipse.org/legal/epl-v20.html
 [21]: http://www.eclipse.org/org/documents/edl-v10.php
