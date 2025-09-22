@@ -1,4 +1,4 @@
-# Small Json Files Test Fixture 0.1.14, released 2025-??-??
+# Small Json Files Test Fixture 0.1.14, released 2025-09-22
 
 Code name: Fixed vulnerabilities in io.netty:netty-codec-http:jar:4.1.124.Final:runtime
 
