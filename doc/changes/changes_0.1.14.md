@@ -23,15 +23,15 @@ Netty is an asynchronous event-driven network application framework for developm
 
 #### Compile Dependency Updates
 
-* Updated `org.mockito:mockito-core:5.15.2` to `5.19.0`
-* Updated `software.amazon.awssdk:apache-client:2.32.25` to `2.33.4`
-* Updated `software.amazon.awssdk:iam:2.32.25` to `2.33.4`
-* Updated `software.amazon.awssdk:lambda:2.32.25` to `2.33.4`
-* Updated `software.amazon.awssdk:s3:2.32.25` to `2.33.4`
-* Updated `software.amazon.awssdk:sts:2.32.25` to `2.33.4`
+* Updated `org.mockito:mockito-core:5.15.2` to `5.20.0`
+* Updated `software.amazon.awssdk:apache-client:2.32.25` to `2.34.0`
+* Updated `software.amazon.awssdk:iam:2.32.25` to `2.34.0`
+* Updated `software.amazon.awssdk:lambda:2.32.25` to `2.34.0`
+* Updated `software.amazon.awssdk:s3:2.32.25` to `2.34.0`
+* Updated `software.amazon.awssdk:sts:2.32.25` to `2.34.0`
 
 #### Test Dependency Updates
 
-* Updated `nl.jqno.equalsverifier:equalsverifier:3.19` to `4.1`
+* Updated `nl.jqno.equalsverifier:equalsverifier:3.19` to `3.19.4`
 * Updated `org.junit.jupiter:junit-jupiter-params:5.11.4` to `5.13.4`
 * Updated `org.slf4j:slf4j-jdk14:2.0.16` to `2.0.17`
