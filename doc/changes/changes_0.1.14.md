@@ -1,6 +1,6 @@
 # Small Json Files Test Fixture 0.1.14, released 2025-??-??
 
-Code name: Fixed vulnerability CVE-2025-58056 in io.netty:netty-codec-http:jar:4.1.124.Final:runtime
+Code name: Fixed vulnerabilities in io.netty:netty-codec-http:jar:4.1.124.Final:runtime
 
 ## Summary
 
@@ -13,8 +13,16 @@ Netty is an asynchronous event-driven network application framework for developm
 * http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-58056
 * https://github.com/netty/netty/security/advisories/GHSA-fghv-69vj-qj49
 
+### CVE-2025-58057 (CWE-409) in dependency `io.netty:netty-codec:jar:4.1.124.Final:runtime`
+netty-codec - Improper Handling of Highly Compressed Data (Data Amplification)
+#### References
+* https://ossindex.sonatype.org/vulnerability/CVE-2025-58057?component-type=maven&component-name=io.netty%2Fnetty-codec&utm_source=ossindex-client&utm_medium=integration&utm_content=1.8.1
+* http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-58057
+* https://github.com/netty/netty/security/advisories/GHSA-3p8m-j85q-pgmj
+
 ## Security
 
+* #44: Fixed vulnerability CVE-2025-58057 in dependency `io.netty:netty-codec:jar:4.1.124.Final:runtime`
 * #46: Fixed vulnerability CVE-2025-58056 in dependency `io.netty:netty-codec-http:jar:4.1.124.Final:runtime`
 
 ## Dependency Updates
