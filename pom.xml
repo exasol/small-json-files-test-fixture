@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>small-json-files-test-fixture</artifactId>
-    <version>0.1.14</version>
+    <version>0.1.15</version>
     <name>Small Json Files Test Fixture</name>
     <description>Test fixture with many small JSON files on S3.</description>
     <url>https://github.com/exasol/small-json-files-test-fixture/</url>
@@ -11,7 +11,7 @@
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
-                <version>2.34.0</version>
+                <version>2.46.9</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>error-reporting-java</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>jakarta.json.bind</groupId>
             <artifactId>jakarta.json.bind-api</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse</groupId>
@@ -69,13 +69,14 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.13.4</version>
+            <!-- Version 6 requires Java 17 -->
+            <version>5.14.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.20.0</version>
+            <version>5.23.0</version>
         </dependency>
         <!--Integration test dependencies-->
         <dependency>
@@ -88,7 +89,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>2.0.17</version>
+            <version>2.0.18</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -105,7 +106,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>5.2.3</version>
+                <version>5.6.2</version>
                 <executions>
                     <execution>
                         <goals>
@@ -116,7 +117,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.3.2</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -131,7 +131,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.6.3</version>
                 <executions>
                     <execution>
                         <id>npm-ci</id>
@@ -142,7 +142,7 @@
                         <configuration>
                             <workingDirectory>src/main/resources/createJsonFilesLambda/</workingDirectory>
                             <executable>npm</executable>
-                            <commandlineArgs>ci</commandlineArgs>
+                            <commandlineArgs>ci --ignore-scripts</commandlineArgs>
                             <useMavenLogger>false</useMavenLogger>
                         </configuration>
                     </execution>
@@ -166,7 +166,7 @@
     <parent>
         <artifactId>small-json-files-test-fixture-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>0.1.14</version>
+        <version>0.1.15</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
