@@ -44,6 +44,7 @@ This release fixes vulnerabilities in the following dependencies:
 * Updated `software.amazon.awssdk:iam:2.34.0` to `2.46.9`
 * Updated `software.amazon.awssdk:lambda:2.34.0` to `2.46.9`
 * Updated `software.amazon.awssdk:s3:2.34.0` to `2.46.9`
+* Added `software.amazon.awssdk:signin:2.46.9`
 * Updated `software.amazon.awssdk:sts:2.34.0` to `2.46.9`
 
 #### Test Dependency Updates

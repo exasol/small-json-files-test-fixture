@@ -23,6 +23,11 @@
             <artifactId>s3</artifactId>
         </dependency>
         <dependency>
+            <!-- Required for profile login -->
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>signin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>error-reporting-java</artifactId>
             <version>1.0.2</version>

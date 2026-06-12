@@ -8,6 +8,7 @@
 | Dependency                                  | License                                                                                                      |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [AWS Java SDK :: Services :: Amazon S3][0]  | [Apache License, Version 2.0][1]                                                                             |
+| [AWS Java SDK :: Services :: Signin][0]     | [Apache License, Version 2.0][1]                                                                             |
 | [error-reporting-java][2]                   | [MIT License][3]                                                                                             |
 | [AWS Java SDK :: Services :: AWS Lambda][0] | [Apache License, Version 2.0][1]                                                                             |
 | [AWS Java SDK :: Services :: AWS IAM][0]    | [Apache License, Version 2.0][1]                                                                             |
