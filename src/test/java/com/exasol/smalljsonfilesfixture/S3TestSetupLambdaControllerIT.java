@@ -6,8 +6,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.*;
 
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -20,7 +18,7 @@ class S3TestSetupLambdaControllerIT {
     private static String bucketName;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() {
         bucketName = "small-json-files-test-fixture-" + System.currentTimeMillis();
         controller = S3TestSetupLambdaController.create(TEST_CONFIG.getTags(), bucketName,
                 TEST_CONFIG.getAwsCredentialsProvider());
@@ -29,7 +27,7 @@ class S3TestSetupLambdaControllerIT {
     }
 
     @AfterAll
-    static void afterAll() throws IOException {
+    static void afterAll() {
         if (controller != null) {
             controller.close();
         }

@@ -8,15 +8,15 @@
     "lint": "npm run eslint && npm run typecheck"
   },
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "@types/aws-lambda": "^8.10.147",
-    "@types/node": "^22.13.1",
-    "eslint": "^9.20.1",
-    "globals": "^15.14.0",
-    "typescript": "^5.7.3"
+    "@eslint/js": "^10.0.1",
+    "@types/aws-lambda": "^8.10.162",
+    "@types/node": "^25.9.3",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.744.0",
-    "@aws-sdk/client-s3": "^3.744.0"
+    "@aws-sdk/client-lambda": "^3.1067.0",
+    "@aws-sdk/client-s3": "^3.1067.0"
   }
 }

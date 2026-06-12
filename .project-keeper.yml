@@ -10,7 +10,6 @@ version:
   fromSource: pom.xml
 linkReplacements:
   - "https://aws.amazon.com/sdkforjava/http-clients/apache-client|https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/apache/ApacheHttpClient.html"
-  - "https://eclipse-ee4j.github.io/jsonb-api|https://github.com/eclipse-ee4j/jsonb-api"
 build:
   workflows:
     - name: ci-build.yml
@@ -21,7 +20,9 @@ build:
           content:
             name: Create test_config.properties
             id: create-test-credentials
-            run: echo "owner = ${{ secrets.AWS_TAG_OWNER }}" > test_config.properties
+            run: echo "owner = $AWS_TAG_OWNER" > test_config.properties
+            env:
+              AWS_TAG_OWNER: ${{ secrets.AWS_TAG_OWNER }}
         - action: REPLACE
           stepId: build-pk-verify
           job: build-and-test
