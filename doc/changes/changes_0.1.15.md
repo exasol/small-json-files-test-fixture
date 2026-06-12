@@ -1,12 +1,35 @@
-# Small Json Files Test Fixture 0.1.15, released 2026-??-??
+# Small Json Files Test Fixture 0.1.15, released 2026-06-12
 
-Code name:
+Code name: Fix vulnerabilities in netty
 
 ## Summary
 
-## Features
+This release fixes vulnerabilities in the following dependencies:
 
-* ISSUE_NUMBER: description
+* `io.netty:netty-codec-http2:jar:4.1.126.Final:runtime`
+  * CVE-2026-33871 (CWE-770): Allocation of Resources Without Limits or Throttling (7.5)
+  * CVE-2026-42587 (CWE-400): Uncontrolled Resource Consumption ('Resource Exhaustion') (8.7)
+  * CVE-2026-48043 (CWE-400): Uncontrolled Resource Consumption ('Resource Exhaustion') (5.3)
+  * CVE-2026-50560 (CWE-770): Allocation of Resources Without Limits or Throttling (6.3)
+  * CVE-2026-47244 (CWE-400): Uncontrolled Resource Consumption ('Resource Exhaustion') (5.3)
+* `io.netty:netty-handler:jar:4.1.126.Final:runtime`
+  * CVE-2026-44249 (CWE-1025): Comparison Using Wrong Factors (8.1)
+  * CVE-2026-45416 (CWE-770): Allocation of Resources Without Limits or Throttling (7.5)
+* `io.netty:netty-codec-http:jar:4.1.126.Final:runtime`
+  * CVE-2025-67735 (CWE-93): Improper Neutralization of CRLF Sequences ('CRLF Injection') (6.5)
+  * CVE-2026-33870 (CWE-444): Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') (8.7)
+  * CVE-2026-41417 (CWE-444): Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') (5.3)
+  * CVE-2026-42580 (CWE-190): Integer Overflow or Wraparound (6.5)
+  * CVE-2026-42581 (CWE-444): Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') (9.8)
+  * CVE-2026-42584 (CWE-444): Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') (9.1)
+  * CVE-2026-42585 (CWE-444): Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling') (7.5)
+  * CVE-2026-42587 (CWE-400): Uncontrolled Resource Consumption ('Resource Exhaustion') (8.7)
+* `io.netty:netty-codec:jar:4.1.126.Final:runtime`
+  * CVE-2026-42583 (CWE-400): Uncontrolled Resource Consumption ('Resource Exhaustion') (7.5)
+
+## Security
+
+* #48: Update dependencies
 
 ## Dependency Updates
 
