@@ -152,6 +152,7 @@ async function uploadFile(bucket, key, content) {
  * @returns {Promise<string>} result message
  */
 async function handleDelete(event, context) {
+    /** @type {string | undefined} */
     let continuationToken;
     /** @type {string[]} */
     let filesToDelete = [];
@@ -237,7 +238,7 @@ function splitIntoChunks(array, chunkSize) {
 /**
  * List S3 files using the given pagination token.
  * @param {string} bucket the S3 bucket
- * @param {string} continuationToken the pagination token
+ * @param {string|undefined} continuationToken the pagination token
  * @returns {Promise<{files:string[], continuationToken?:string}>} the keys of all files
  */
 async function listFiles(bucket, continuationToken) {
@@ -247,7 +248,7 @@ async function listFiles(bucket, continuationToken) {
             ContinuationToken: continuationToken
         })
     );
-    const files = (result.Contents || []).map(file => file.Key);
+    const files = (result.Contents || []).map(file => file.Key).filter(key => key !== undefined);
     return { files, continuationToken: result.NextContinuationToken };
 }
 

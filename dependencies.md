@@ -128,6 +128,6 @@
 [53]: https://maven.apache.org/plugins/maven-resources-plugin/
 [54]: https://maven.apache.org/plugins/maven-install-plugin/
 [55]: https://maven.apache.org/plugins/maven-site-plugin/
-[56]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.744.0.tgz
+[56]: https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.1067.0.tgz
 [57]: https://github.com/aws/aws-sdk-js-v3
-[58]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.744.0.tgz
+[58]: https://registry.npmjs.org/@aws-sdk/client-s3/-/client-s3-3.1067.0.tgz

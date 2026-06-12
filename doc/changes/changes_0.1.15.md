@@ -50,3 +50,19 @@ Code name:
 * Updated `org.jacoco:jacoco-maven-plugin:0.8.13` to `0.8.14`
 * Updated `org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751` to `5.5.0.6356`
 * Updated `org.sonatype.central:central-publishing-maven-plugin:0.7.0` to `0.10.0`
+
+### CreateJsonFilesLambda
+
+#### Compile Dependency Updates
+
+* Updated `@aws-sdk/client-lambda:^3.744.0` to `^3.1067.0`
+* Updated `@aws-sdk/client-s3:^3.744.0` to `^3.1067.0`
+
+#### Development Dependency Updates
+
+* Updated `eslint:^9.20.1` to `^10.4.1`
+* Updated `@eslint/js:^9.20.0` to `^10.0.1`
+* Updated `@types/node:^22.13.1` to `^25.9.3`
+* Updated `globals:^15.14.0` to `^17.6.0`
+* Updated `typescript:^5.7.3` to `^6.0.3`
+* Updated `@types/aws-lambda:^8.10.147` to `^8.10.162`
