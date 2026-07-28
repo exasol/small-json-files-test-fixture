@@ -20,7 +20,6 @@
                 <artifactId>netty-bom</artifactId>
                 <version>4.1.136.Final</version>
             </dependency>
-
             <dependency>
                 <groupId>software.amazon.awscdk</groupId>
                 <artifactId>aws-cdk-lib</artifactId>
