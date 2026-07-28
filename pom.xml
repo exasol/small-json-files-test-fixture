@@ -15,31 +15,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- Upgrading transitive dependency io.netty:netty-codec:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-59901 -->
             <dependency>
                 <groupId>io.netty</groupId>
-                <artifactId>netty-codec</artifactId>
+                <artifactId>netty-bom</artifactId>
                 <version>4.1.136.Final</version>
             </dependency>
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-59898 -->
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-56746 -->
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-55831 -->
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-59921 -->
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-56745 -->
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-55833 -->
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-59899 -->
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http</artifactId>
-                <version>4.1.136.Final</version>
-            </dependency>
-            <!-- Upgrading transitive dependency io.netty:netty-codec-http2:jar:4.1.135.Final:compile of software.amazon.awssdk:s3:jar:2.46.9:compile to fix CVE-2026-59900 -->
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.136.Final</version>
-            </dependency>
-            <!-- Upgrading transitive dependency software.amazon.awscdk:aws-cdk-lib:jar:2.136.0:compile to fix GHSA-464c-974j-9xm6 -->
+
             <dependency>
                 <groupId>software.amazon.awscdk</groupId>
                 <artifactId>aws-cdk-lib</artifactId>
