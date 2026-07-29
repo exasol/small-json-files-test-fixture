@@ -20,5 +20,6 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "exasol",
     "projectKey": "com.exasol:small-json-files-test-fixture"
-  }
+  },
+  "java.configuration.updateBuildConfiguration": "automatic"
 }
