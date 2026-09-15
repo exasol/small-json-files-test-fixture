@@ -17,7 +17,7 @@ import jakarta.json.*;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.http.SdkHttpClient;
-import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.http.apache5.Apache5HttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.Policy;
@@ -121,11 +121,11 @@ class S3TestSetupLambdaController implements AutoCloseable {
         try (final LambdaClient lambdaClient = createLambdaClient()) {
             lambdaClient.createFunction(
                     builder -> builder.functionName(this.lambdaFunctionName).architectures(Architecture.ARM64) //
-                            .code(codeBuilder -> codeBuilder.zipFile(zipBytes)) //
-                            .role(role.arn()) //
-                            .runtime(Runtime.NODEJS24_X) //
-                            .handler("createJsonFilesLambda.handler") //
-                            .timeout(15 * 60) //
+                            .code(codeBuilder -> codeBuilder.zipFile(zipBytes))
+                            .role(role.arn())
+                            .runtime(Runtime.NODEJS24_X)
+                            .handler("createJsonFilesLambda.handler")
+                            .timeout(15 * 60)
                             .tags(this.tags));
             sleep("lambda '" + this.lambdaFunctionName + "' being fully created", Duration.ofSeconds(5));
         }
@@ -144,10 +144,10 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     private SdkHttpClient getHttpClientWithIncreasedTimeouts() {
         final Duration timeout = Duration.ofMinutes(1);
-        return ApacheHttpClient.builder() //
-                .socketTimeout(Duration.ofMinutes(16)) //
-                .connectionAcquisitionTimeout(Duration.ofMinutes(10)) //
-                .connectionTimeout(timeout) //
+        return Apache5HttpClient.builder()
+                .socketTimeout(Duration.ofMinutes(16))
+                .connectionAcquisitionTimeout(Duration.ofMinutes(10))
+                .connectionTimeout(timeout)
                 .build();
     }
 
@@ -184,9 +184,9 @@ class S3TestSetupLambdaController implements AutoCloseable {
 
     private String getPolicyDocument() {
         final String policyTemplate = getResourceAsString("createJsonFilesLambda/policy.json");
-        return policyTemplate //
-                .replace("{ACCOUNT}", this.accountId) //
-                .replace("{BUCKET}", this.bucket) //
+        return policyTemplate
+                .replace("{ACCOUNT}", this.accountId)
+                .replace("{BUCKET}", this.bucket)
                 .replace("{FUNCTION}", this.lambdaFunctionName);
     }
 

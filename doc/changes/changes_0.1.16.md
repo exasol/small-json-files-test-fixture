@@ -151,7 +151,8 @@ In Eclipse Parsson published Maven Central artifacts before version 1.1.8, the J
 #### Compile Dependency Updates
 
 * Updated `jakarta.json.bind:jakarta.json.bind-api:3.0.2` to `3.0.3`
-* Updated `software.amazon.awssdk:apache-client:2.46.9` to `2.54.18`
+* Removed `software.amazon.awssdk:apache-client:2.46.9`
+* Added `software.amazon.awssdk:apache5-client:2.54.18`
 * Updated `software.amazon.awssdk:iam:2.46.9` to `2.54.18`
 * Updated `software.amazon.awssdk:lambda:2.46.9` to `2.54.18`
 * Updated `software.amazon.awssdk:s3:2.46.9` to `2.54.18`
@@ -184,3 +185,18 @@ In Eclipse Parsson published Maven Central artifacts before version 1.1.8, the J
 * Updated `org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356` to `5.7.0.6970`
 * Updated `org.sonatype.central:central-publishing-maven-plugin:0.10.0` to `0.11.0`
 * Added `org.spdx:spdx-maven-plugin:1.0.4`
+
+### CreateJsonFilesLambda
+
+#### Compile Dependency Updates
+
+* Updated `@aws-sdk/client-lambda:^3.1067.0` to `^3.1132.0`
+* Updated `@aws-sdk/client-s3:^3.1067.0` to `^3.1132.0`
+
+#### Development Dependency Updates
+
+* Updated `eslint:^10.4.1` to `^10.10.0`
+* Updated `@types/node:^25.9.3` to `^26.5.1`
+* Updated `globals:^17.6.0` to `^17.12.0`
+* Updated `typescript:^6.0.3` to `^7.0.2`
+* Updated `@types/aws-lambda:^8.10.162` to `^8.10.163`
