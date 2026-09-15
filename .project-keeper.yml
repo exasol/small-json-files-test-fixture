@@ -8,8 +8,6 @@ sources:
     path: src/main/resources/createJsonFilesLambda/package.json
 version:
   fromSource: pom.xml
-linkReplacements:
-  - "https://aws.amazon.com/sdkforjava/http-clients/apache-client|https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/apache/ApacheHttpClient.html"
 build:
   workflows:
     - name: ci-build.yml
