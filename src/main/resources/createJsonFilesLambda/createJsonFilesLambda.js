@@ -197,7 +197,7 @@ async function handleDelete(event, context) {
  * @returns {Promise<string>} the invocation result
  */
 async function invokeDeleteLambda(context, bucket, files) {
-    /** @typedef {DeleteListEvent} */
+    /** @type {DeleteListEvent} */
     const callParams = {
         action: ACTION_DELETE_LIST,
         bucket,
