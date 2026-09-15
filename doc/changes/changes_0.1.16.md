@@ -160,7 +160,8 @@ In Eclipse Parsson published Maven Central artifacts before version 1.1.8, the J
 
 #### Runtime Dependency Updates
 
-* Updated `org.eclipse:yasson:3.0.4` to `3.0.5`
+* Added `org.eclipse.yasson:yasson:3.0.5`
+* Removed `org.eclipse:yasson:3.0.4`
 
 #### Test Dependency Updates
 

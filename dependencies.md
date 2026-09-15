@@ -29,9 +29,9 @@
 
 ### Runtime Dependencies
 
-| Dependency   | License                                                                                                           |
-| ------------ | ----------------------------------------------------------------------------------------------------------------- |
-| [Yasson][19] | [Eclipse Public License v. 2.0][20]; [GNU General Public License, version 2 with the GNU Classpath Exception][21] |
+| Dependency   | License                                                                        |
+| ------------ | ------------------------------------------------------------------------------ |
+| [Yasson][19] | [Eclipse Public License v. 2.0][20]; [Eclipse Distribution License v. 1.0][21] |
 
 ### Plugin Dependencies
 
@@ -93,9 +93,9 @@
 [16]: https://www.apache.org/licenses/LICENSE-2.0.txt
 [17]: http://www.slf4j.org
 [18]: https://opensource.org/license/mit
-[19]: https://projects.eclipse.org/projects/ee4j/yasson
-[20]: https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt
-[21]: https://www.gnu.org/software/classpath/license.html
+[19]: https://projects.eclipse.org/projects/ee4j.yasson
+[20]: http://www.eclipse.org/legal/epl-v20.html
+[21]: http://www.eclipse.org/org/documents/edl-v10.php
 [22]: https://docs.sonarsource.com/sonarqube-server/latest/extension-guide/developing-a-plugin/plugin-basics/sonar-scanner-maven/sonar-maven-plugin/
 [23]: http://www.gnu.org/licenses/lgpl.txt
 [24]: https://maven.apache.org/plugins/maven-toolchains-plugin/
