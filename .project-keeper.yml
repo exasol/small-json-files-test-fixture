@@ -8,8 +8,6 @@ sources:
     path: src/main/resources/createJsonFilesLambda/package.json
 version:
   fromSource: pom.xml
-linkReplacements:
-  - "https://aws.amazon.com/sdkforjava/http-clients/apache-client|https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/http/apache/ApacheHttpClient.html"
 build:
   workflows:
     - name: ci-build.yml
@@ -29,7 +27,7 @@ build:
           content:
             name: Run tests and build with Maven
             id: build-pk-verify
-            run: mvn --batch-mode clean verify
+            run: mvn --batch-mode -DossindexSkip=true clean verify
             env:
               AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
               AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

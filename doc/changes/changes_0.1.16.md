@@ -1,10 +1,10 @@
-# Small Json Files Test Fixture 0.1.16, released 2026-07-28
+# Small Json Files Test Fixture 0.1.16, released 2026-09-15
 
-Code name: Fixed vulnerabilities CVE-2026-59901, CVE-2026-59898, CVE-2026-56746, CVE-2026-55831, CVE-2026-59921, CVE-2026-56745, CVE-2026-55833, CVE-2026-59899, CVE-2026-59900, CVE-2026-56819, CVE-2026-54399, CVE-2026-54428, CVE-2026-9563
+Code name: Fixed vulnerabilities CVE-2026-59901, CVE-2026-59898, CVE-2026-56746, CVE-2026-55831, CVE-2026-59921, CVE-2026-56745, CVE-2026-55833, CVE-2026-59899, CVE-2026-59900, CVE-2026-56819, CVE-2026-54399, CVE-2026-54428, CVE-2026-9563, CVE-2026-89044, CVE-2026-89044, CVE-2026-71290, CVE-2026-62243, CVE-2026-75595, CVE-2026-75596, CVE-2026-64607, CVE-2026-59903
 
 ## Summary
 
-This release fixes the following 13 vulnerabilities:
+This release fixes the following 21 vulnerabilities:
 
 ### CVE-2026-59901, GHSA-558V-64GR-WGG4 (CWE-835) in dependency `io.netty:netty-codec:jar:4.1.135.Final:compile`
 Netty: [Bzip2Decoder] Infinite Loop in RLE State Machine Leads to Event-Loop Thread Hang
@@ -122,6 +122,14 @@ In Eclipse Parsson published Maven Central artifacts before version 1.1.8, the J
 
 ## Security
 
+* #72: Fixed vulnerability CVE-2026-89044 in dependency `io.netty:netty-codec-http2:jar:4.1.136.Final:runtime`
+* #71: Fixed vulnerability CVE-2026-89044 in dependency `io.netty:netty-codec-http:jar:4.1.136.Final:runtime`
+* #70: Fixed vulnerability CVE-2026-71290 in dependency `org.apache.httpcomponents.client5:httpclient5:jar:5.6.2:runtime`
+* #69: Fixed vulnerability CVE-2026-62243 in dependency `io.netty:netty-handler:jar:4.1.136.Final:runtime`
+* #68: Fixed vulnerability CVE-2026-75595 in dependency `io.netty:netty-handler:jar:4.1.136.Final:runtime`
+* #67: Fixed vulnerability CVE-2026-75596 in dependency `io.netty:netty-handler:jar:4.1.136.Final:runtime`
+* #66: Fixed vulnerability CVE-2026-64607 in dependency `org.apache.httpcomponents.client5:httpclient5:jar:5.6.2:runtime`
+* #65: Fixed vulnerability CVE-2026-59903 in dependency `io.netty:netty-codec-http:jar:4.1.136.Final:runtime`
 * #53: Fixed vulnerability CVE-2026-59901, GHSA-558V-64GR-WGG4 in dependency `io.netty:netty-codec:jar:4.1.135.Final:compile`
 * #60: Fixed vulnerability CVE-2026-59898, GHSA-4MP9-239F-G9HG in dependency `io.netty:netty-codec-http:jar:4.1.135.Final:compile`
 * #59: Fixed vulnerability CVE-2026-56746, GHSA-6CQP-G7GG-8HR5 in dependency `io.netty:netty-codec-http:jar:4.1.135.Final:compile`
@@ -135,30 +143,61 @@ In Eclipse Parsson published Maven Central artifacts before version 1.1.8, the J
 * #50: Fixed vulnerability CVE-2026-54399 in dependency `org.apache.httpcomponents.core5:httpcore5:jar:5.4.2:compile`
 * #51: Fixed vulnerability CVE-2026-54428 in dependency `org.apache.httpcomponents.core5:httpcore5-h2:jar:5.4:compile`
 * #52: Fixed vulnerability CVE-2026-9563 in dependency `org.eclipse.parsson:parsson:jar:1.1.7:compile`
+
 ## Dependency Updates
 
 ### Small Json Files Test Fixture
 
 #### Compile Dependency Updates
 
-* Updated `software.amazon.awssdk:apache-client:2.46.9` to `2.49.4`
-* Updated `software.amazon.awssdk:iam:2.46.9` to `2.49.4`
-* Updated `software.amazon.awssdk:lambda:2.46.9` to `2.49.4`
-* Updated `software.amazon.awssdk:s3:2.46.9` to `2.49.4`
-* Updated `software.amazon.awssdk:signin:2.46.9` to `2.49.4`
-* Updated `software.amazon.awssdk:sts:2.46.9` to `2.49.4`
+* Updated `jakarta.json.bind:jakarta.json.bind-api:3.0.2` to `3.0.3`
+* Removed `software.amazon.awssdk:apache-client:2.46.9`
+* Added `software.amazon.awssdk:apache5-client:2.54.18`
+* Updated `software.amazon.awssdk:iam:2.46.9` to `2.54.18`
+* Updated `software.amazon.awssdk:lambda:2.46.9` to `2.54.18`
+* Updated `software.amazon.awssdk:s3:2.46.9` to `2.54.18`
+* Updated `software.amazon.awssdk:signin:2.46.9` to `2.54.18`
+* Updated `software.amazon.awssdk:sts:2.46.9` to `2.54.18`
+
+#### Runtime Dependency Updates
+
+* Added `org.eclipse.yasson:yasson:3.0.5`
+* Removed `org.eclipse:yasson:3.0.4`
+
+#### Test Dependency Updates
+
+* Updated `org.slf4j:slf4j-jdk14:2.0.18` to `2.0.19`
 
 #### Plugin Dependency Updates
 
-* Updated `com.exasol:error-code-crawler-maven-plugin:2.0.7` to `2.1.0`
-* Updated `com.exasol:project-keeper-maven-plugin:5.6.2` to `5.7.4`
+* Updated `com.exasol:error-code-crawler-maven-plugin:2.0.7` to `2.1.1`
+* Updated `com.exasol:project-keeper-maven-plugin:5.6.2` to `5.7.5`
 * Removed `com.exasol:quality-summarizer-maven-plugin:0.2.1`
+* Updated `io.github.git-commit-id:git-commit-id-maven-plugin:10.0.0` to `10.0.1`
 * Updated `org.apache.maven.plugins:maven-enforcer-plugin:3.6.2` to `3.6.3`
 * Updated `org.apache.maven.plugins:maven-failsafe-plugin:3.5.5` to `3.5.6`
 * Updated `org.apache.maven.plugins:maven-site-plugin:3.21.0` to `3.22.0`
 * Updated `org.apache.maven.plugins:maven-surefire-plugin:3.5.5` to `3.5.6`
+* Updated `org.apache.maven.plugins:maven-toolchains-plugin:3.2.0` to `3.3.0`
 * Added `org.codehaus.mojo:build-helper-maven-plugin:3.6.1`
+* Updated `org.codehaus.mojo:exec-maven-plugin:3.6.3` to `3.6.4`
+* Updated `org.codehaus.mojo:flatten-maven-plugin:1.7.3` to `1.8.0`
 * Updated `org.jacoco:jacoco-maven-plugin:0.8.14` to `0.8.15`
 * Updated `org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356` to `5.7.0.6970`
 * Updated `org.sonatype.central:central-publishing-maven-plugin:0.10.0` to `0.11.0`
 * Added `org.spdx:spdx-maven-plugin:1.0.4`
+
+### CreateJsonFilesLambda
+
+#### Compile Dependency Updates
+
+* Updated `@aws-sdk/client-lambda:^3.1067.0` to `^3.1132.0`
+* Updated `@aws-sdk/client-s3:^3.1067.0` to `^3.1132.0`
+
+#### Development Dependency Updates
+
+* Updated `eslint:^10.4.1` to `^10.10.0`
+* Updated `@types/node:^25.9.3` to `^26.5.1`
+* Updated `globals:^17.6.0` to `^17.12.0`
+* Updated `typescript:^6.0.3` to `^7.0.2`
+* Updated `@types/aws-lambda:^8.10.162` to `^8.10.163`
