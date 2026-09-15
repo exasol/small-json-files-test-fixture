@@ -11,21 +11,21 @@
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
-                <version>2.49.4</version>
+                <version>2.54.18</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.136.Final</version>
+                <version>4.2.18.Final</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>software.amazon.awscdk</groupId>
                 <artifactId>aws-cdk-lib</artifactId>
-                <version>2.253.0</version>
+                <version>2.269.0</version>
             </dependency>
             <!-- Upgrading transitive dependency org.apache.httpcomponents.core5:httpcore5-h2:jar:5.4:compile of software.amazon.awssdk:s3:jar:2.49.4:compile to fix CVE-2026-54428 -->
             <dependency>
@@ -80,12 +80,12 @@
         <dependency>
             <groupId>jakarta.json.bind</groupId>
             <artifactId>jakarta.json.bind-api</artifactId>
-            <version>3.0.2</version>
+            <version>3.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>yasson</artifactId>
-            <version>3.0.4</version>
+            <version>3.0.5</version>
             <scope>runtime</scope>
         </dependency>
         <!-- Test dependencies -->
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>2.0.18</version>
+            <version>2.0.19</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -135,7 +135,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>5.7.4</version>
+                <version>5.7.5</version>
                 <executions>
                     <execution>
                         <goals>
